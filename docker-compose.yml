@@ -1,0 +1,62 @@
+version: '3.7'
+services:
+
+  # The Application Container
+  inventory-movements-app:
+    container_name: inventory-movements-app
+    image: inventory-movements-app
+    build:
+      context: ./
+      dockerfile: docker/app/Dockerfile
+    environment:
+      - "DB_DATABASE=app"
+      - "DB_USERNAME=laravel"
+      - "DB_HOST=inventory-movements-db"
+      - "DB_PASSWORD=supersecret"
+    working_dir: /var/www
+    ports:
+        - 9002:9000
+    networks:
+      - inventory-movements
+    volumes:
+      - ./:/var/www/
+    depends_on:
+      - inventory-movements-db
+
+  # The Web Server Container
+  inventory-movements-web:
+    container_name: inventory-movements-web
+    image: inventory-movements-web
+    build:
+      context: ./
+      dockerfile: docker/web/Dockerfile
+    networks:
+      - inventory-movements
+    ports:
+      - '8080:80'
+    volumes:
+      - ./public:/var/www/public
+    depends_on:
+      - inventory-movements-app
+
+  # The Database Container
+  inventory-movements-db:
+    container_name: inventory-movements-db
+    image: mysql:5.7
+    networks:
+      - inventory-movements
+    ports:
+      - '33065:3306'
+    volumes:
+      - inventory-movements-db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: supersecret
+      MYSQL_DATABASE: app
+
+volumes:
+  inventory-movements-db:
+
+networks:
+  inventory-movements:
