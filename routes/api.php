@@ -23,5 +23,9 @@ Route::middleware('auth:api')->get(
 Route::group(
     [],
     function () {
+        Route::get('/products', 'ProductController@getProducts');
+        Route::get('/products/apply/{id}', 'ProductController@applyQuantity');
+        Route::get('/purchases', 'PurchaseController@getPurchases');
+        Route::get('/applications', 'ApplicationController@getApplications');
     }
 );

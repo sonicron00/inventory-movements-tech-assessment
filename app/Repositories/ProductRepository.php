@@ -4,6 +4,7 @@
 namespace App\Repositories;
 
 use App\Models\Product;
+use Illuminate\Support\Collection;
 
 
 class ProductRepository extends BaseRepository
@@ -30,18 +31,8 @@ class ProductRepository extends BaseRepository
         $transactionArray = [];
         $productApplications = $this->find($productId)->applications();
         $productPurchases = $this->find($productId)->purchases();
-        array_push(
-            $transactionArray,
-            [
-                'applications' => $productApplications->all()
-            ]
-        );
-        array_push(
-            $transactionArray,
-            [
-                'purchases' => $productPurchases->all()
-            ]
-        );
+        $transactionArray['applications'] = $productApplications->get();
+        $transactionArray['purchases'] = $productPurchases->get();
         return $transactionArray;
     }
 
@@ -50,9 +41,9 @@ class ProductRepository extends BaseRepository
      * Returns all purchase transactions in given ascending order
      * @param int $productId
      * @param string $orderType ('asc' or 'desc')
-     * @return array
+     * @return Collection
      */
-    public function getPurchasesByProductOrderedByDate(int $productId, string $orderType): array
+    public function getPurchasesByProductOrderedByDate(int $productId, string $orderType): Collection
     {
         return $this->find($productId)->purchases()->orderBy('transaction_date', $orderType)->get();
     }

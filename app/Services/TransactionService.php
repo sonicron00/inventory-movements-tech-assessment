@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Repositories\ApplicationRepository;
 use App\Repositories\PurchaseRepository;
+use Illuminate\Support\Collection;
 
 
 class TransactionService
@@ -65,7 +66,7 @@ class TransactionService
      */
     public function getAllApplications(): array
     {
-        return $this->appRepo->all();
+        return $this->appRepo->all()->toArray();
     }
 
     /**
@@ -74,7 +75,7 @@ class TransactionService
      */
     public function getAllPurchases(): array
     {
-        return $this->purchaseRepo->all();
+        return $this->purchaseRepo->all()->toArray();
     }
 
 }

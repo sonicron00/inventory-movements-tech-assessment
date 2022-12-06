@@ -4,7 +4,6 @@
 namespace App\Services;
 
 use App\Repositories\ProductRepository;
-use Illuminate\Support\Collection;
 use App\Exceptions\InsufficientQuantityException;
 
 class ProductService
