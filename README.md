@@ -19,6 +19,15 @@ This application has been dockerised into component containers (Application, Web
 * Duplicate the .env.example file to create a local '.env'
 * Run the Laravel command to generate the web application key:<br>
     `docker-compose exec inventory-movements-app php artisan key:generate`
+* Run the initial database migrations:<br>
+    `docker-compose exec inventory-movements-app php artisan migrate`<br>
+* Run the database seeders:
+    `docker-compose exec inventory-movements-app php artisan db:seed`<br><br>
+  Note: The seeders work together to create a product and then subsequently link all transactions to that product.
 
-@TODO: migration and seeder notes
 
+
+#### Assumptions, Scope and Design Considerations:
+* Authentication/user profiles excluded from scope
+* Within the 'Products' database table - design decision made not to store a 'quantity' field - although anticipated volumes are not known, the current specification requires 'on the fly' computation of value so a hard coded quantity would be redundant in this application. Arguably could have been added for future proofing, but in this case a simple migration and seeder would address this should scope change in the future.
+* Applications and Purchases have been created as individual database tables (though they are almost identical) for scalability and separation of concern. Model inheritance is applied to keep the code clean.

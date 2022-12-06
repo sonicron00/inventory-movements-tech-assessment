@@ -4,7 +4,14 @@
 namespace App\Models;
 
 
-class Application
+class Application extends Transaction
 {
+    /*
+    * --------------------------------------------------------------------------
+    * Application Model
+    * --------------------------------------------------------------------------
+    * Apply transaction model to applications table
+    */
+    protected string $table = 'applications';
 
 }
