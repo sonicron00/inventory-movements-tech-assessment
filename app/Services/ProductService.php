@@ -27,22 +27,6 @@ class ProductService
         $this->productRepo = $productRepo;
     }
 
-    /**
-     * Create or modify a product record
-     * returns true on success, false on failure
-     * @param array $productData
-     * @return bool
-     */
-    public function createOrUpdateProduct(array $productData): bool
-    {
-        try {
-            $this->productRepo->updateOrCreate(['id' => $productData['id']], $productData);
-            return true;
-        } catch (\Exception $exception) {
-            logger($exception);
-            return false;
-        }
-    }
 
     /**
      * Get all products
@@ -75,7 +59,7 @@ class ProductService
         return $productDetail;
     }
 
-    public function updateProductDescription(int $productId, string $description): void
+    public function createOrUpdateProduct(int $productId, string $description): void
     {
         $this->productRepo->updateOrCreate(['id' => $productId], ['description' => $description]);
     }

@@ -26,7 +26,7 @@ class ProductController extends Controller
 
     public function createOrUpdate(string $description, int $productId = 0): void
     {
-        $this->productService->updateProductDescription($productId, $description);
+        $this->productService->createOrUpdateProduct($productId, $description);
     }
 
 }
