@@ -1,7 +1,6 @@
 const Welcome = () => import('./components/Welcome.vue');
 const Products = () => import('./components/Products');
-const Applications = () => import('./components/Applications');
-const Purchases = () => import('./components/Purchases');
+const Transactions = () => import('./components/Transactions');
 
 
 export const routes = [
@@ -17,13 +16,8 @@ export const routes = [
         props: {canEdit: true}
     },
     {
-        name: 'applications',
-        path: '/applications',
-        component: Applications
-    },
-    {
-        name: 'purchases',
-        path: '/purchases',
-        component: Purchases
+        name: 'transactions',
+        path: '/transactions',
+        component: Transactions
     },
 ]

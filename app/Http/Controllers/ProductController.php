@@ -19,9 +19,14 @@ class ProductController extends Controller
         return $this->productService->getAllProductsWithQuantity();
     }
 
-    public function applyQuantity(int $productId)
+    public function calculateQuantity(int $productId, int $quantity): float
     {
-        return $this->productService->computeFifoValueByQuantityAndProduct($productId, 10);
+        return $this->productService->computeFifoValueByQuantityAndProduct($productId, $quantity);
+    }
+
+    public function createOrUpdate(string $description, int $productId = 0): void
+    {
+        $this->productService->updateProductDescription($productId, $description);
     }
 
 }

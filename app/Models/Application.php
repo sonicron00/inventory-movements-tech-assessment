@@ -14,4 +14,12 @@ class Application extends Transaction
     */
     protected string $table = 'applications';
 
+    public array $fillable = [
+        'transaction_date',
+        'product_id',
+        'quantity',
+        'created_at',
+        'updated_at'
+    ];
+
 }

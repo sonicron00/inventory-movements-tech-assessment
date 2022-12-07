@@ -1,7 +1,7 @@
 <template>
   <div class="container mt-5">
     <div class="col-12 text-center">
-      <h1>Product Availability - Application</h1>
+      <h1>Product Availability - Application Calculator</h1>
     </div>
     <div class="container mt-5">
       <Products :can-apply="true" :can-edit="false"></Products>

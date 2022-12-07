@@ -24,8 +24,12 @@ Route::group(
     [],
     function () {
         Route::get('/products', 'ProductController@getProducts');
-        Route::get('/products/apply/{id}', 'ProductController@applyQuantity');
-        Route::get('/purchases', 'PurchaseController@getPurchases');
-        Route::get('/applications', 'ApplicationController@getApplications');
+        Route::get('/products/preapply/{id}/{qty}', 'ProductController@calculateQuantity');
+        Route::put('/products/apply/{id}/{qty}', 'TransactionController@applyQuantity');
+        Route::put('/products/edit/{descr}/{qty}', 'ProductController@createOrUpdate');
+        Route::get('/purchases', 'TransactionController@getPurchases');
+        Route::put('/purchases/create/{id}/{qty}/{price}', 'TransactionController@createPurchase');
+        Route::get('/applications', 'TransactionController@getApplications');
+        Route::get('/transactions', 'TransactionController@getAllTransactions');
     }
 );

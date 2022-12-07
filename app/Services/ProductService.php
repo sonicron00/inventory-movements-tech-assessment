@@ -75,6 +75,22 @@ class ProductService
         return $productDetail;
     }
 
+    public function updateProductDescription(int $productId, string $description): void
+    {
+        $this->productRepo->updateOrCreate(['id' => $productId], ['description' => $description]);
+    }
+
+    /**
+     * Get product description by Id
+     * Returns product name/description field by given ID
+     * @param int $productId
+     * @return string
+     */
+    public function getProductDescriptionFromId(int $productId): string
+    {
+        return $this->productRepo->find($productId)->first()->description;
+    }
+
     /**
      * Compute 'FIFO' (first in first out) value for requested application quantity
      * Returns an monetary value being the requested application quantity calculated
@@ -98,7 +114,6 @@ class ProductService
         }
 
         foreach ($purchases as $purchase) {
-
             $purchasedAmountUnapplied = ($purchase->qty_purchased - $purchase->qty_applied);
 
             // Purchase exceeds requirement (partially applied)

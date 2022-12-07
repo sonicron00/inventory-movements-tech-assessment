@@ -19,7 +19,7 @@ class Purchase extends Transaction
         'product_id',
         'qty_purchased',
         'price',
-        'qty_applied',
+        'qty_applied', // Added for future functionality of allocating inventory
         'created_at',
         'updated_at'
     ];
