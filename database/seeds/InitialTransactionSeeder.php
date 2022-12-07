@@ -61,7 +61,7 @@ class InitialTransactionSeeder extends DatabaseSeeder
             [
                 'transaction_date' => Carbon::createFromFormat('d/m/Y', $tranDate),
                 'product_id' => $productId,
-                'quantity' => $quantity,
+                'qty_purchased' => $quantity,
                 'price' => $price,
                 'created_at' => NOW(),
                 'updated_at' => NOW()

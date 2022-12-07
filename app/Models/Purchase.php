@@ -17,8 +17,9 @@ class Purchase extends Transaction
     public array $fillable = [
         'transaction_date',
         'product_id',
-        'quantity',
+        'qty_purchased',
         'price',
+        'qty_applied',
         'created_at',
         'updated_at'
     ];

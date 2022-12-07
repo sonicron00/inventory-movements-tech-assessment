@@ -98,17 +98,20 @@ class ProductService
         }
 
         foreach ($purchases as $purchase) {
+
+            $purchasedAmountUnapplied = ($purchase->qty_purchased - $purchase->qty_applied);
+
             // Purchase exceeds requirement (partially applied)
-            if ($purchase->quantity > $quantityToApply) {
+            if ($purchasedAmountUnapplied > $quantityToApply) {
                 $value += $quantityToApply * $purchase->price;
                 $quantityToApply = 0;
                 break;
             }
 
             // Requirement exceeds purchase (fully applied)
-            if ($quantityToApply > $purchase->quantity) {
-                $value += $purchase->quantity * $purchase->price;
-                $quantityToApply -= $purchase->quantity;
+            if ($quantityToApply > $purchasedAmountUnapplied) {
+                $value += $purchasedAmountUnapplied * $purchase->price;
+                $quantityToApply -= $purchasedAmountUnapplied;
                 continue;
             }
         }
@@ -130,7 +133,7 @@ class ProductService
             $quantity += $application->quantity;
         }
         foreach ($transactions['purchases'] as $purchase) {
-            $quantity += $purchase->quantity;
+            $quantity += $purchase->qty_purchased;
         }
         return $quantity;
     }
