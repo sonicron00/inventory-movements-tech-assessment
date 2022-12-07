@@ -28,6 +28,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       products: [],
       calculatedPrice: 0,
       requestedQuantity: 0,
+      isLoading: false,
       fields: [{
         key: "productID",
         label: "ID"
@@ -83,7 +84,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.next = 2;
+                _this.isLoading = true;
+                _context.next = 3;
                 return _this.axios.get('/api/products').then(function (response) {
                   _this.products = response.data;
                   _this.products = _this.products.map(function (item) {
@@ -91,11 +93,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
                       isEdit: false
                     });
                   });
+                  _this.isLoading = false;
                 })["catch"](function (error) {
                   console.log(error);
                   _this.products = [];
+                  _this.isLoading = false;
                 });
-              case 2:
+              case 3:
               case "end":
                 return _context.stop();
             }
@@ -105,14 +109,17 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     createOrUpdateProduct: function createOrUpdateProduct(description, id) {
       var _this2 = this;
+      this.isLoading = true;
       var payloadId = 0;
       if (id != null) {
         payloadId = id;
       } // If we pass 0 we will create a new item
       this.axios.put("/api/products/edit/".concat(description, "/").concat(payloadId)).then(function (response) {
         _this2.getProducts();
+        _this2.isLoading = false;
       })["catch"](function (error) {
         console.log(error);
+        _this2.isLoading = false;
       });
     },
     getPriceForQuantity: function getPriceForQuantity(data) {
@@ -127,26 +134,33 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         this.$refs.productTable.refresh();
         return;
       }
+      this.isLoading = true;
       this.axios.get("/api/products/preapply/".concat(this.products[data.index].productID, "/").concat(this.products[data.index].requestedQuantity)).then(function (response) {
         _this3.products[data.index].calculatedPrice = response.data;
         _this3.products[data.index].showPrice = true;
         _this3.$refs.productTable.refresh();
+        _this3.isLoading = false;
       })["catch"](function (error) {
+        _this3.isLoading = false;
         console.log(error);
       });
     },
     applyQuantity: function applyQuantity(data) {
       var _this4 = this;
+      this.isLoading = true;
       this.axios.put("/api/products/apply/".concat(this.products[data.index].productID, "/").concat(this.products[data.index].requestedQuantity)).then(function (response) {
         _this4.getProducts();
         _this4.products[data.index].showPrice = false;
+        _this4.isLoading = false;
       })["catch"](function (error) {
+        _this4.isLoading = false;
         console.log(error);
       });
     },
     quantityChanged: function quantityChanged(data) {
       this.products[data.index].showPrice = false;
       this.products[data.index].invalidQty = false;
+      this.products[data.index].insufficientQty = false;
       this.$refs.productTable.refresh();
     }
   }
@@ -197,6 +211,11 @@ var render = function render() {
     staticClass: "card"
   }, [_vm._m(0), _vm._v(" "), _c("div", {
     staticClass: "card-body"
+  }, [_c("b-overlay", {
+    attrs: {
+      show: _vm.isLoading,
+      rounded: "sm"
+    }
   }, [_c("b-table", {
     ref: "productTable",
     attrs: {
@@ -255,7 +274,7 @@ var render = function render() {
               return _vm.getPriceForQuantity(data);
             }
           }
-        }, [_vm._v("\n                Calculate\n              ")]), _vm._v(" "), _vm.products[data.index].showPrice ? _c("p", [_vm._v("Value: $" + _vm._s(_vm.products[data.index].calculatedPrice))]) : _vm._e(), _vm._v(" "), _vm.products[data.index].showPrice ? _c("button", {
+        }, [_vm._v("\n                  Calculate\n                ")]), _vm._v(" "), _vm.products[data.index].showPrice ? _c("h4", [_vm._v("Value: $" + _vm._s(_vm.products[data.index].calculatedPrice))]) : _vm._e(), _vm._v(" "), _vm.products[data.index].showPrice ? _c("button", {
           staticClass: "btn btn-primary",
           attrs: {
             type: "button"
@@ -265,7 +284,27 @@ var render = function render() {
               return _vm.applyQuantity(data);
             }
           }
-        }, [_vm._v("Apply\n              ")]) : _vm._e(), _vm._v(" "), _vm.products[data.index].invalidQty ? _c("p", [_vm._v("Quantity must be greater than zero")]) : _vm._e(), _vm._v(" "), _vm.products[data.index].insufficientQty ? _c("p", [_vm._v("Quantity to be applied exceeds the quantity on hand")]) : _vm._e()];
+        }, [_vm._v("Apply\n                ")]) : _vm._e(), _vm._v(" "), _vm.products[data.index].showPrice ? _c("button", {
+          staticClass: "btn btn-danger",
+          attrs: {
+            type: "button"
+          },
+          on: {
+            click: function click($event) {
+              return _vm.quantityChanged(data);
+            }
+          }
+        }, [_vm._v("Cancel\n                ")]) : _vm._e(), _vm._v(" "), _c("b-alert", {
+          attrs: {
+            show: _vm.products[data.index].invalidQty,
+            variant: "warning"
+          }
+        }, [_c("p", [_vm._v("Quantity must be greater than zero")])]), _vm._v(" "), _c("b-alert", {
+          attrs: {
+            show: _vm.products[data.index].insufficientQty,
+            variant: "warning"
+          }
+        }, [_c("p", [_vm._v("Quantity to be applied exceeds the quantity on hand")])])];
       }
     }, {
       key: "cell(edit)",
@@ -287,7 +326,7 @@ var render = function render() {
     on: {
       click: _vm.addRowHandler
     }
-  }, [_vm._v("Add Item")]) : _vm._e()], 1)])])])]);
+  }, [_vm._v("Add Item")]) : _vm._e()], 1)], 1)])])])]);
 };
 var staticRenderFns = [function () {
   var _vm = this,

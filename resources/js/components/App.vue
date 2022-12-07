@@ -10,8 +10,7 @@
             <router-link exact-active-class="active" to="/" class="nav-item nav-link">Product Application</router-link>
             <router-link exact-active-class="active" to="/products" class="nav-item nav-link">Product Admin</router-link>
             <router-link exact-active-class="active" to="/transactions" class="nav-item nav-link">Transactions</router-link>
-            <router-link exact-active-class="active" to="/" class="nav-item nav-link">Price History</router-link>
-            <router-link exact-active-class="active" to="/" class="nav-item nav-link">Bonus</router-link>
+            <router-link exact-active-class="active" to="/bonus" class="nav-item nav-link">Bonus</router-link>
           </div>
         </div>
       </div>
