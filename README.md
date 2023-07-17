@@ -65,3 +65,4 @@ The basic assessment criteria functionality is addressed within the 'Product App
 * Within the 'Products' database table - design decision made not to store a 'quantity' field - although anticipated volumes are not known, the current specification requires 'on the fly' computation of value so a hard coded quantity would be redundant in this application. Arguably could have been added for future proofing, but in this case a simple migration and seeder would address this should scope change in the future.
 * Applications and Purchases have been created as individual database tables (though they are almost identical) for scalability and separation of concern. Model inheritance is applied to keep the code clean.
 
+New in July 2023...
