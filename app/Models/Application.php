@@ -12,9 +12,9 @@ class Application extends Transaction
     * --------------------------------------------------------------------------
     * Apply transaction model to applications table
     */
-    protected string $table = 'applications';
+    protected $table = 'applications';
 
-    public array $fillable = [
+    public $fillable = [
         'transaction_date',
         'product_id',
         'quantity',

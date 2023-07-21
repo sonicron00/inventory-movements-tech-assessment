@@ -12,9 +12,9 @@ class Purchase extends Transaction
     * --------------------------------------------------------------------------
     * Apply transaction model to purchases table
     */
-    protected string $table = 'purchases';
+    protected $table = 'purchases';
 
-    public array $fillable = [
+    public $fillable = [
         'transaction_date',
         'product_id',
         'qty_purchased',

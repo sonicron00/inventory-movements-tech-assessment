@@ -21,7 +21,7 @@ class InitialTransactionSeeder extends DatabaseSeeder
 
         $firstLine = true;
 
-        while (($data = fgetcsv($tranCSVFile, '', ",")) !== false) {
+        while (($data = fgetcsv($tranCSVFile, null, ",")) !== false) {
             if (!$firstLine) {
                 $tranDate = $data[0];
                 $quantity = $data[2];
