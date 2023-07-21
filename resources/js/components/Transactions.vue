@@ -28,22 +28,35 @@
     </div>
     <div class="overflow-auto">
       <p class="mt-3">Current Page: {{ currentPage }} of {{ pageCount }}</p>
+      <b-overlay :show="isLoading" rounded="sm">
+        <b-form-group>
+        <b-input-group size="sm">
+          <b-form-input
+              id="filter-input"
+              v-model="filter"
+              type="search"
+              placeholder="Search by product name"
+          ></b-form-input>
+        </b-input-group>
+        </b-form-group>
       <b-pagination
           v-model="currentPage"
           :total-rows="rows"
           :per-page="perPage"
-          first-text="⏮"
-          prev-text="⏪"
-          next-text="⏩"
-          last-text="⏭"
+          aria-controls="tran-table"
           class="mt-4"
       ></b-pagination>
       <b-table
+          id="tran-table"
           :items="transactions"
           :fields="fields"
           :sort-by.sync="sortBy"
           :sort-desc.sync="sortDesc"
-
+          :total-rows="rows"
+          :per-page="perPage"
+          :current-page="currentPage"
+          :filter="filter"
+          filter-included-fields="product_descr"
           responsive="sm"
       >
         <template #cell(product_id)="data">
@@ -69,6 +82,7 @@
           <b-button v-if="transactions[data.index].isEdit" @click="recordPurchase(data)">Save</b-button>
         </template>
       </b-table>
+      </b-overlay>
     </div>
   </div>
 </template>
@@ -81,12 +95,14 @@ export default {
   data() {
     return {
       sortBy: 'transaction_date',
+      filter: null,
       sortDesc: false,
-      perPage: 10,
+      perPage: 15,
       currentPage: 1,
       editMode: false,
       dismissSecs: 10,
       dismissCountDown: 0,
+      isLoading: false,
       fields: [
         {key: 'product_id', sortable: true},
         {key: 'transaction_date', sortable: true},
@@ -107,16 +123,19 @@ export default {
       return this.transactions.length;
     },
     pageCount() {
-      return Math.round(this.transactions.length / this.perPage);
+      return Math.ceil(this.transactions.length / this.perPage);
     }
   },
   methods: {
     async getTransactions() {
+      this.isLoading = true;
       await this.axios.get('/api/transactions').then(response => {
         this.transactions = response.data
+        this.isLoading = false;
       }).catch(error => {
         console.log(error)
-        this.transactions = []
+        this.transactions = [];
+        this.isLoading = false;
       })
     },
     countDownChanged(dismissCountDown) {

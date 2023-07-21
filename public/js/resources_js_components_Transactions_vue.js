@@ -57,12 +57,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   data: function data() {
     return {
       sortBy: 'transaction_date',
+      filter: null,
       sortDesc: false,
-      perPage: 10,
+      perPage: 15,
       currentPage: 1,
       editMode: false,
       dismissSecs: 10,
       dismissCountDown: 0,
+      isLoading: false,
       fields: [{
         key: 'product_id',
         sortable: true
@@ -96,7 +98,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       return this.transactions.length;
     },
     pageCount: function pageCount() {
-      return Math.round(this.transactions.length / this.perPage);
+      return Math.ceil(this.transactions.length / this.perPage);
     }
   },
   methods: {
@@ -107,14 +109,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.next = 2;
+                _this.isLoading = true;
+                _context.next = 3;
                 return _this.axios.get('/api/transactions').then(function (response) {
                   _this.transactions = response.data;
+                  _this.isLoading = false;
                 })["catch"](function (error) {
                   console.log(error);
                   _this.transactions = [];
+                  _this.isLoading = false;
                 });
-              case 2:
+              case 3:
               case "end":
                 return _context.stop();
             }
@@ -277,15 +282,34 @@ var render = function render() {
     staticClass: "overflow-auto"
   }, [_c("p", {
     staticClass: "mt-3"
-  }, [_vm._v("Current Page: " + _vm._s(_vm.currentPage) + " of " + _vm._s(_vm.pageCount))]), _vm._v(" "), _c("b-pagination", {
+  }, [_vm._v("Current Page: " + _vm._s(_vm.currentPage) + " of " + _vm._s(_vm.pageCount))]), _vm._v(" "), _c("b-overlay", {
+    attrs: {
+      show: _vm.isLoading,
+      rounded: "sm"
+    }
+  }, [_c("b-form-group", [_c("b-input-group", {
+    attrs: {
+      size: "sm"
+    }
+  }, [_c("b-form-input", {
+    attrs: {
+      id: "filter-input",
+      type: "search",
+      placeholder: "Search by product name"
+    },
+    model: {
+      value: _vm.filter,
+      callback: function callback($$v) {
+        _vm.filter = $$v;
+      },
+      expression: "filter"
+    }
+  })], 1)], 1), _vm._v(" "), _c("b-pagination", {
     staticClass: "mt-4",
     attrs: {
       "total-rows": _vm.rows,
       "per-page": _vm.perPage,
-      "first-text": "⏮",
-      "prev-text": "⏪",
-      "next-text": "⏩",
-      "last-text": "⏭"
+      "aria-controls": "tran-table"
     },
     model: {
       value: _vm.currentPage,
@@ -296,10 +320,16 @@ var render = function render() {
     }
   }), _vm._v(" "), _c("b-table", {
     attrs: {
+      id: "tran-table",
       items: _vm.transactions,
       fields: _vm.fields,
       "sort-by": _vm.sortBy,
       "sort-desc": _vm.sortDesc,
+      "total-rows": _vm.rows,
+      "per-page": _vm.perPage,
+      "current-page": _vm.currentPage,
+      filter: _vm.filter,
+      "filter-included-fields": "product_descr",
       responsive: "sm"
     },
     on: {
@@ -387,7 +417,7 @@ var render = function render() {
         }, [_vm._v("Save")]) : _vm._e()];
       }
     }])
-  })], 1)]);
+  })], 1)], 1)]);
 };
 var staticRenderFns = [];
 render._withStripped = true;
