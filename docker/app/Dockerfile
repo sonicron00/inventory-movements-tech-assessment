@@ -1,5 +1,5 @@
 # PHP
-FROM php:7.4.0-fpm-buster
+FROM php:8.1-fpm-buster
 
 # update APT sources
 RUN apt-get update --fix-missing
