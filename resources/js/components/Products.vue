@@ -2,10 +2,16 @@
   <div>
     <div class="row">
       <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h4>Inventory</h4>
-          </div>
+        <div class="col-12 text-center">
+          <b-jumbotron v-if="canEdit" >
+            <template #header>Inventory</template>
+            <template #lead>
+              Inventory product management
+            </template>
+            <hr class="my-4">
+            <b-button v-if="!editMode" class="add-button" variant="success" @click="addRowHandler">Add Item</b-button>
+            <b-button v-if="editMode" variant="warning" @click="cancelAdd">Cancel</b-button>
+          </b-jumbotron>
           <div class="card-body">
             <b-overlay :show="isLoading" rounded="sm">
               <b-table ref="productTable" :items="products" :fields="fields">
@@ -49,7 +55,6 @@
                   </b-button>
                 </template>
               </b-table>
-              <b-button v-if="canEdit" class="add-button" variant="success" @click="addRowHandler">Add Item</b-button>
             </b-overlay>
           </div>
         </div>
@@ -68,6 +73,7 @@ export default {
       calculatedPrice: 0,
       requestedQuantity: 0,
       isLoading: false,
+      editMode: false,
       fields: [
         {key: "productID", label: "ID"},
         {key: "description", label: "Description"},
@@ -92,12 +98,17 @@ export default {
       }
       this.products[data.index].isEdit = !this.products[data.index].isEdit;
     },
+    cancelAdd() {
+      this.products.splice(0, 1);
+      this.editMode = false;
+    },
     inputHandler(value, index, key) {
       this.products[index][key] = value;
       this.$set(this.products, index, this.products[index]);
       this.$emit("input", this.products);
     },
     addRowHandler() {
+      this.editMode = true;
       const newRow = this.fields.reduce((a, c) => ({...a, [c.key]: null}), {})
       newRow.isEdit = true;
       this.products.unshift(newRow);

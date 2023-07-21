@@ -26,6 +26,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     return {
       sortBy: 'product_id',
       sortDesc: false,
+      perPage: 10,
+      currentPage: 1,
+      editMode: false,
       fields: [{
         key: 'product_id',
         sortable: true
@@ -53,6 +56,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   mounted: function mounted() {
     this.getTransactions();
+  },
+  computed: {
+    rows: function rows() {
+      return this.transactions.length;
+    },
+    pageCount: function pageCount() {
+      return Math.round(this.transactions.length / this.perPage);
+    }
   },
   methods: {
     getTransactions: function getTransactions() {
@@ -88,12 +99,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.$emit("input", this.transactions);
     },
     addRowHandler: function addRowHandler() {
+      this.editMode = true;
       var newRow = this.fields.reduce(function (a, c) {
         return _objectSpread(_objectSpread({}, a), {}, _defineProperty({}, c.key, null));
       }, {});
       newRow.isEdit = true;
       this.transactions.unshift(newRow);
       this.$emit('input', this.transactions);
+    },
+    cancelAdd: function cancelAdd() {
+      this.transactions.splice(0, 1);
+      this.editMode = false;
     },
     createPurchase: function createPurchase(productId, qty, price) {
       var _this2 = this;
@@ -122,7 +138,25 @@ __webpack_require__.r(__webpack_exports__);
 var render = function render() {
   var _vm = this,
     _c = _vm._self._c;
-  return _c("div", [_vm._m(0), _vm._v(" "), _c("div", [_c("b-button", {
+  return _c("div", [_c("div", {
+    staticClass: "col-12 text-center"
+  }, [_c("b-jumbotron", {
+    scopedSlots: _vm._u([{
+      key: "header",
+      fn: function fn() {
+        return [_vm._v("Transactions")];
+      },
+      proxy: true
+    }, {
+      key: "lead",
+      fn: function fn() {
+        return [_vm._v("\n        Manual input for purchase transactions\n      ")];
+      },
+      proxy: true
+    }])
+  }, [_vm._v(" "), _vm._v(" "), _c("hr", {
+    staticClass: "my-4"
+  }), _vm._v(" "), !_vm.editMode ? _c("b-button", {
     staticClass: "add-button",
     attrs: {
       variant: "success"
@@ -130,12 +164,42 @@ var render = function render() {
     on: {
       click: _vm.addRowHandler
     }
-  }, [_vm._v("Enter Purchase")]), _vm._v(" "), _c("b-table", {
+  }, [_vm._v("Enter Purchase")]) : _vm._e(), _vm._v(" "), _vm.editMode ? _c("b-button", {
+    attrs: {
+      variant: "warning"
+    },
+    on: {
+      click: _vm.cancelAdd
+    }
+  }, [_vm._v("Cancel")]) : _vm._e()], 1)], 1), _vm._v(" "), _c("div", {
+    staticClass: "overflow-auto"
+  }, [_c("p", {
+    staticClass: "mt-3"
+  }, [_vm._v("Current Page: " + _vm._s(_vm.currentPage) + " of " + _vm._s(_vm.pageCount))]), _vm._v(" "), _c("b-pagination", {
+    staticClass: "mt-4",
+    attrs: {
+      "total-rows": _vm.rows,
+      "per-page": _vm.perPage,
+      "first-text": "⏮",
+      "prev-text": "⏪",
+      "next-text": "⏩",
+      "last-text": "⏭"
+    },
+    model: {
+      value: _vm.currentPage,
+      callback: function callback($$v) {
+        _vm.currentPage = $$v;
+      },
+      expression: "currentPage"
+    }
+  }), _vm._v(" "), _c("b-table", {
     attrs: {
       items: _vm.transactions,
       fields: _vm.fields,
       "sort-by": _vm.sortBy,
       "sort-desc": _vm.sortDesc,
+      "per-page": _vm.perPage,
+      "current-page": _vm.currentPage,
       responsive: "sm"
     },
     on: {
@@ -225,13 +289,7 @@ var render = function render() {
     }])
   })], 1)]);
 };
-var staticRenderFns = [function () {
-  var _vm = this,
-    _c = _vm._self._c;
-  return _c("div", {
-    staticClass: "card-header"
-  }, [_c("h4", [_vm._v("Transactions")])]);
-}];
+var staticRenderFns = [];
 render._withStripped = true;
 
 

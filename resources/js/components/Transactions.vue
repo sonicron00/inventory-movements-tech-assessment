@@ -1,15 +1,35 @@
 <template>
   <div>
-    <div class="card-header">
-      <h4>Transactions</h4>
+    <div class="col-12 text-center">
+      <b-jumbotron>
+        <template #header>Transactions</template>
+        <template #lead>
+          Manual input for purchase transactions
+        </template>
+        <hr class="my-4">
+        <b-button v-if="!editMode" class="add-button" variant="success" @click="addRowHandler">Enter Purchase</b-button>
+        <b-button v-if="editMode" variant="warning" @click="cancelAdd">Cancel</b-button>
+      </b-jumbotron>
     </div>
-    <div>
-      <b-button class="add-button" variant="success" @click="addRowHandler">Enter Purchase</b-button>
+    <div class="overflow-auto">
+      <p class="mt-3">Current Page: {{ currentPage }} of {{ pageCount }}</p>
+      <b-pagination
+          v-model="currentPage"
+          :total-rows="rows"
+          :per-page="perPage"
+          first-text="⏮"
+          prev-text="⏪"
+          next-text="⏩"
+          last-text="⏭"
+          class="mt-4"
+      ></b-pagination>
       <b-table
           :items="transactions"
           :fields="fields"
           :sort-by.sync="sortBy"
           :sort-desc.sync="sortDesc"
+          :per-page="perPage"
+          :current-page="currentPage"
           responsive="sm"
       >
         <template #cell(product_id)="data">
@@ -35,7 +55,6 @@
           <b-button v-if="transactions[data.index].isEdit" @click="recordPurchase(data)">Save</b-button>
         </template>
       </b-table>
-
     </div>
   </div>
 </template>
@@ -47,6 +66,9 @@ export default {
     return {
       sortBy: 'product_id',
       sortDesc: false,
+      perPage: 10,
+      currentPage: 1,
+      editMode: false,
       fields: [
         {key: 'product_id', sortable: true},
         {key: 'transaction_date', sortable: true},
@@ -61,6 +83,14 @@ export default {
   },
   mounted() {
     this.getTransactions()
+  },
+  computed: {
+    rows() {
+      return this.transactions.length;
+    },
+    pageCount() {
+      return Math.round(this.transactions.length / this.perPage);
+    }
   },
   methods: {
     async getTransactions() {
@@ -82,10 +112,15 @@ export default {
       this.$emit("input", this.transactions);
     },
     addRowHandler() {
+      this.editMode = true;
       const newRow = this.fields.reduce((a, c) => ({...a, [c.key]: null}), {})
       newRow.isEdit = true;
       this.transactions.unshift(newRow);
       this.$emit('input', this.transactions);
+    },
+    cancelAdd() {
+      this.transactions.splice(0, 1);
+      this.editMode = false;
     },
     createPurchase(productId, qty, price) {
       this.axios.put(`/api/purchases/create/${productId}/${qty}/${price}`).then(response => {

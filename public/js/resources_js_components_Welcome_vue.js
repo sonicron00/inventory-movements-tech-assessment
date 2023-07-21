@@ -29,6 +29,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       calculatedPrice: 0,
       requestedQuantity: 0,
       isLoading: false,
+      editMode: false,
       fields: [{
         key: "productID",
         label: "ID"
@@ -64,12 +65,17 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       }
       this.products[data.index].isEdit = !this.products[data.index].isEdit;
     },
+    cancelAdd: function cancelAdd() {
+      this.products.splice(0, 1);
+      this.editMode = false;
+    },
     inputHandler: function inputHandler(value, index, key) {
       this.products[index][key] = value;
       this.$set(this.products, index, this.products[index]);
       this.$emit("input", this.products);
     },
     addRowHandler: function addRowHandler() {
+      this.editMode = true;
       var newRow = this.fields.reduce(function (a, c) {
         return _objectSpread(_objectSpread({}, a), {}, _defineProperty({}, c.key, null));
       }, {});
@@ -208,8 +214,39 @@ var render = function render() {
   }, [_c("div", {
     staticClass: "col-12"
   }, [_c("div", {
-    staticClass: "card"
-  }, [_vm._m(0), _vm._v(" "), _c("div", {
+    staticClass: "col-12 text-center"
+  }, [_vm.canEdit ? _c("b-jumbotron", {
+    scopedSlots: _vm._u([{
+      key: "header",
+      fn: function fn() {
+        return [_vm._v("Inventory")];
+      },
+      proxy: true
+    }, {
+      key: "lead",
+      fn: function fn() {
+        return [_vm._v("\n            Inventory product management\n          ")];
+      },
+      proxy: true
+    }], null, false, 3671696354)
+  }, [_vm._v(" "), _vm._v(" "), _c("hr", {
+    staticClass: "my-4"
+  }), _vm._v(" "), !_vm.editMode ? _c("b-button", {
+    staticClass: "add-button",
+    attrs: {
+      variant: "success"
+    },
+    on: {
+      click: _vm.addRowHandler
+    }
+  }, [_vm._v("Add Item")]) : _vm._e(), _vm._v(" "), _vm.editMode ? _c("b-button", {
+    attrs: {
+      variant: "warning"
+    },
+    on: {
+      click: _vm.cancelAdd
+    }
+  }, [_vm._v("Cancel")]) : _vm._e()], 1) : _vm._e(), _vm._v(" "), _c("div", {
     staticClass: "card-body"
   }, [_c("b-overlay", {
     attrs: {
@@ -318,23 +355,9 @@ var render = function render() {
         }, [!_vm.products[data.index].isEdit ? _c("span", [_vm._v("Edit")]) : _c("span", [_vm._v("Save")])])];
       }
     }])
-  }), _vm._v(" "), _vm.canEdit ? _c("b-button", {
-    staticClass: "add-button",
-    attrs: {
-      variant: "success"
-    },
-    on: {
-      click: _vm.addRowHandler
-    }
-  }, [_vm._v("Add Item")]) : _vm._e()], 1)], 1)])])])]);
+  })], 1)], 1)], 1)])])]);
 };
-var staticRenderFns = [function () {
-  var _vm = this,
-    _c = _vm._self._c;
-  return _c("div", {
-    staticClass: "card-header"
-  }, [_c("h4", [_vm._v("Inventory")])]);
-}];
+var staticRenderFns = [];
 render._withStripped = true;
 
 
@@ -356,7 +379,23 @@ var render = function render() {
     _c = _vm._self._c;
   return _c("div", {
     staticClass: "container mt-5"
-  }, [_vm._m(0), _vm._v(" "), _c("div", {
+  }, [_c("div", {
+    staticClass: "col-12 text-center"
+  }, [_c("b-jumbotron", {
+    scopedSlots: _vm._u([{
+      key: "header",
+      fn: function fn() {
+        return [_vm._v("Product Availability")];
+      },
+      proxy: true
+    }, {
+      key: "lead",
+      fn: function fn() {
+        return [_vm._v("\n        Application Calculator\n      ")];
+      },
+      proxy: true
+    }])
+  })], 1), _vm._v(" "), _c("div", {
     staticClass: "container mt-5"
   }, [_c("Products", {
     attrs: {
@@ -365,13 +404,7 @@ var render = function render() {
     }
   })], 1)]);
 };
-var staticRenderFns = [function () {
-  var _vm = this,
-    _c = _vm._self._c;
-  return _c("div", {
-    staticClass: "col-12 text-center"
-  }, [_c("h1", [_vm._v("Product Availability - Application Calculator")])]);
-}];
+var staticRenderFns = [];
 render._withStripped = true;
 
 
