@@ -10,6 +10,21 @@
         <b-button v-if="!editMode" class="add-button" variant="success" @click="addRowHandler">Enter Purchase</b-button>
         <b-button v-if="editMode" variant="warning" @click="cancelAdd">Cancel</b-button>
       </b-jumbotron>
+      <b-alert
+          :show="dismissCountDown"
+          dismissible
+          variant="success"
+          @dismissed="dismissCountDown=0"
+          @dismiss-count-down="countDownChanged"
+      >
+        <p>Transaction successfully recorded!</p>
+        <b-progress
+            variant="success"
+            :max="dismissSecs"
+            :value="dismissCountDown"
+            height="4px"
+        ></b-progress>
+      </b-alert>
     </div>
     <div class="overflow-auto">
       <p class="mt-3">Current Page: {{ currentPage }} of {{ pageCount }}</p>
@@ -28,8 +43,7 @@
           :fields="fields"
           :sort-by.sync="sortBy"
           :sort-desc.sync="sortDesc"
-          :per-page="perPage"
-          :current-page="currentPage"
+
           responsive="sm"
       >
         <template #cell(product_id)="data">
@@ -60,15 +74,19 @@
 </template>
 
 <script>
+import Alert from './Shared/Alert.vue'
 export default {
   name: "Transactions",
+  components: {Alert},
   data() {
     return {
-      sortBy: 'product_id',
+      sortBy: 'transaction_date',
       sortDesc: false,
       perPage: 10,
       currentPage: 1,
       editMode: false,
+      dismissSecs: 10,
+      dismissCountDown: 0,
       fields: [
         {key: 'product_id', sortable: true},
         {key: 'transaction_date', sortable: true},
@@ -101,10 +119,12 @@ export default {
         this.transactions = []
       })
     },
+    countDownChanged(dismissCountDown) {
+      this.dismissCountDown = dismissCountDown
+    },
     recordPurchase(data) {
       this.transactions[data.index].isEdit = !this.transactions[data.index].isEdit;
       this.createPurchase(this.transactions[data.index].product_id, this.transactions[data.index].qty, this.transactions[data.index].price);
-      this.getTransactions();
     },
     inputHandler(value, index, key) {
       this.transactions[index][key] = value;
@@ -112,6 +132,8 @@ export default {
       this.$emit("input", this.transactions);
     },
     addRowHandler() {
+      this.sortBy = 'transaction_date';
+      this.sortDesc = false;
       this.editMode = true;
       const newRow = this.fields.reduce((a, c) => ({...a, [c.key]: null}), {})
       newRow.isEdit = true;
@@ -125,6 +147,10 @@ export default {
     createPurchase(productId, qty, price) {
       this.axios.put(`/api/purchases/create/${productId}/${qty}/${price}`).then(response => {
         this.getTransactions();
+        this.sortBy = 'transaction_date';
+        this.sortDesc = true;
+        this.editMode = false;
+        this.dismissCountDown = 10;
       }).catch(error => {
         console.log(error);
       })

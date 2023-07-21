@@ -81,9 +81,14 @@ abstract class BaseRepository
      *
      * @return mixed
      */
-    public function all()
+    public function all(): mixed
     {
         return $this->model->all();
+    }
+
+    public function allWithRelation(string $relation): array
+    {
+        return $this->model->with($relation)->get()->all();
     }
 
     /**

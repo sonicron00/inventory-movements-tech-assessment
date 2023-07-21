@@ -1,7 +1,7 @@
 <template>
   <div class="container mt-5">
     <div class="col-12 text-center">
-      <b-jumbotron >
+      <b-jumbotron>
         <template #header>Product Availability</template>
         <template #lead>
           Application Calculator
@@ -16,8 +16,9 @@
 
 <script>
 import Products from "./Products";
+
 export default {
-name: "Welcome.vue",
+  name: "Welcome.vue",
   components: {Products}
 }
 </script>

@@ -135,6 +135,7 @@ export default {
       this.axios.put(`/api/products/edit/${description}/${payloadId}`).then(response => {
         this.getProducts();
         this.isLoading = false;
+        this.editMode = false;
       }).catch(error => {
         console.log(error);
         this.isLoading = false;

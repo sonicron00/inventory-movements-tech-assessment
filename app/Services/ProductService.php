@@ -15,16 +15,9 @@ class ProductService
      * @since      Class available since Release 0.0.1
      */
 
-    public ProductRepository $productRepo;
 
-    /**
-     * Product Service constructor.
-     *
-     * @param ProductRepository $productRepo
-     */
-    public function __construct(ProductRepository $productRepo)
+    public function __construct( private readonly ProductRepository $productRepo)
     {
-        $this->productRepo = $productRepo;
     }
 
 
@@ -47,14 +40,11 @@ class ProductService
         $productDetail = [];
         $allProducts = $this->productRepo->all();
         foreach ($allProducts as $product) {
-            array_push(
-                $productDetail,
-                [
-                    'productID' => $product->id,
-                    'description' => $product->description,
-                    'quantity' => $this->getAvailableQuantityByProduct($product->id)
-                ]
-            );
+            $productDetail[] = [
+                'productID' => $product->id,
+                'description' => $product->description,
+                'quantity' => $this->getAvailableQuantityByProduct($product->id)
+            ];
         }
         return $productDetail;
     }
@@ -62,17 +52,6 @@ class ProductService
     public function createOrUpdateProduct(int $productId, string $description): void
     {
         $this->productRepo->updateOrCreate(['id' => $productId], ['description' => $description]);
-    }
-
-    /**
-     * Get product description by Id
-     * Returns product name/description field by given ID
-     * @param int $productId
-     * @return string
-     */
-    public function getProductDescriptionFromId(int $productId): string
-    {
-        return $this->productRepo->find($productId)->first()->description;
     }
 
     /**

@@ -98,30 +98,25 @@ class TransactionService
     {
         $allTransactionsFormatted = [];
         foreach ($this->getAllApplications() as $application) {
-            array_push(
-                $allTransactionsFormatted,
-                (object)[
-                    'product_id' => $application['product_id'],
-                    'transaction_date' => $application['transaction_date'],
-                    'transaction_type' => 'Application',
-                    'product_descr' => $this->productService->getProductDescriptionFromId($application['product_id']),
-                    'qty' => $application['quantity'],
-                    'price' => ''
-                ]
-            );
+            $allTransactionsFormatted[] = (object)[
+                'product_id' => $application['product_id'],
+                'transaction_date' => $application['transaction_date'],
+                'transaction_type' => 'Application',
+                'product_descr' => $application['products']['description'],
+                'qty' => $application['quantity'],
+                'price' => ''
+            ];
         }
         foreach ($this->getAllPurchases() as $purchase) {
-            array_push(
-                $allTransactionsFormatted,
-                (object)[
-                    'product_id' => $purchase['product_id'],
-                    'transaction_date' => $purchase['transaction_date'],
-                    'transaction_type' => 'Purchase',
-                    'product_descr' => $this->productService->getProductDescriptionFromId($application['product_id']),
-                    'qty' => $purchase['qty_purchased'],
-                    'price' => $purchase['price']
-                ]
-            );
+            logger($purchase);
+            $allTransactionsFormatted[] = (object)[
+                'product_id' => $purchase['product_id'],
+                'transaction_date' => $purchase['transaction_date'],
+                'transaction_type' => 'Purchase',
+                'product_descr' => $purchase['products']['description'],
+                'qty' => $purchase['qty_purchased'],
+                'price' => $purchase['price']
+            ];
         }
         return $allTransactionsFormatted;
     }
@@ -132,7 +127,7 @@ class TransactionService
      */
     public function getAllApplications(): array
     {
-        return $this->appRepo->all()->toArray();
+        return $this->appRepo->allWithRelation('products');
     }
 
     /**
@@ -141,7 +136,7 @@ class TransactionService
      */
     public function getAllPurchases(): array
     {
-        return $this->purchaseRepo->all()->toArray();
+        return $this->purchaseRepo->allWithRelation('products');
     }
 
 }

@@ -123,6 +123,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       this.axios.put("/api/products/edit/".concat(description, "/").concat(payloadId)).then(function (response) {
         _this2.getProducts();
         _this2.isLoading = false;
+        _this2.editMode = false;
       })["catch"](function (error) {
         console.log(error);
         _this2.isLoading = false;
