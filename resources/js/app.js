@@ -1,3 +1,5 @@
+import Vuetify from "vuetify";
+
 require('./bootstrap');
 
 
@@ -8,9 +10,14 @@ import VueRouter from 'vue-router';
 import VueAxios from 'vue-axios';
 import axios from 'axios';
 import {routes} from './routes';
+import vuetify from './vuetify';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 
-// Import Bootstrap and BootstrapVue CSS files (order is important)
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+Vue.component('font-awesome-icon', FontAwesomeIcon)
+
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
@@ -24,8 +31,12 @@ const router = new VueRouter({
     routes: routes
 });
 
+Vue.use(Vuetify);
+import 'vuetify/dist/vuetify.min.css'
+
 const app = new Vue({
     el: '#app',
+    vuetify,
     router: router,
     render: h => h(App),
 });
