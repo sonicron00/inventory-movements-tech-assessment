@@ -88,7 +88,7 @@ abstract class BaseRepository
 
     public function allWithRelation(string $relation): array
     {
-        return $this->model->with($relation)->get()->all();
+        return $this->model->with($relation)->orderBy('updated_at','desc')->get()->all();
     }
 
     /**

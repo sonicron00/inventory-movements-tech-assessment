@@ -7,11 +7,9 @@ use App\Services\ProductService;
 
 class ProductController extends Controller
 {
-    protected ProductService $productService;
 
-    public function __construct(ProductService $productService)
+    public function __construct(private readonly ProductService $productService)
     {
-        $this->productService = $productService;
     }
 
     public function getProducts(): array

@@ -7,11 +7,9 @@ use App\Services\TransactionService;
 
 class TransactionController
 {
-    protected TransactionService $tranService;
 
-    public function __construct(TransactionService $tranService)
+    public function __construct(private readonly TransactionService $tranService)
     {
-        $this->tranService = $tranService;
     }
 
     public function getAllTransactions(): array

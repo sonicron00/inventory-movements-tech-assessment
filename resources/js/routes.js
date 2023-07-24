@@ -4,6 +4,9 @@ const Transactions = () => import('./components/Transactions');
 const Bonus = () => import('./components/Bonus');
 const NewBonus = () => import('./components/NewBonus.vue');
 const Home = () => import('./components/Home.vue');
+const NewWelcome = () => import('./components/NewWelcome.vue');
+const NewQuestions = () => import('./components/NewQuestions.vue');
+const NewProposal = () => import('./components/NewProposal.vue');
 
 export const routes = [
     {
@@ -12,7 +15,7 @@ export const routes = [
         component: Welcome
     },
     {
-        name: 'home',
+        name: 'main',
         path: '/landing',
         component: Home
     },
@@ -35,6 +38,11 @@ export const routes = [
     {
         name: 'new-bonus',
         path: '/new-bonus',
-        component: NewBonus
+        component: NewBonus,
+        children: [
+            { path: '/', component: NewWelcome, name: 'new-bonus' },
+            { path: 'questions', component: NewQuestions },
+            { path: 'proposal', component: NewProposal }
+        ]
     }
 ]

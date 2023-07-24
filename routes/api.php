@@ -26,7 +26,7 @@ Route::group(
         Route::get('/products', 'ProductController@getProducts');
         Route::get('/products/preapply/{id}/{qty}', 'ProductController@calculateQuantity');
         Route::put('/products/edit/{descr}/{id}', 'ProductController@createOrUpdate');
-
+        Route::get('/questions', 'QuestionController@getQuestions');
         Route::get('/purchases', 'TransactionController@getPurchases');
         Route::get('/applications', 'TransactionController@getApplications');
         Route::get('/transactions', 'TransactionController@getAllTransactions');

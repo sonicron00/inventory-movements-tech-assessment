@@ -10,7 +10,9 @@
         app
         clipped
         permanent
-    ><sidebar-menu :menu="menu" show-child="true" />
+    ><sidebar-menu :menu="menu" show-child="true">
+      <span slot="dropdown-icon"></span>
+    </sidebar-menu>
     </v-navigation-drawer>
 
   </div>

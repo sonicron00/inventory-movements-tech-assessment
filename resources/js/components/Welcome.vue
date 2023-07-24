@@ -22,7 +22,3 @@ export default {
   components: {Products}
 }
 </script>
-
-<style scoped>
-
-</style>

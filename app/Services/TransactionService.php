@@ -15,26 +15,11 @@ class TransactionService
      * @since      Class available since Release 0.0.1
      */
 
-
-    public ApplicationRepository $appRepo;
-    public PurchaseRepository $purchaseRepo;
-    public ProductService $productService;
-
-    /**
-     * Transaction Service constructor.
-     *
-     * @param ApplicationRepository $appRepo
-     * @param PurchaseRepository $purchaseRepo
-     * @param \App\Services\ProductService $productService
-     */
     public function __construct(
-        ApplicationRepository $appRepo,
-        PurchaseRepository $purchaseRepo,
-        ProductService $productService
+        public ApplicationRepository $appRepo,
+        public PurchaseRepository $purchaseRepo,
+        public ProductService $productService
     ) {
-        $this->appRepo = $appRepo;
-        $this->purchaseRepo = $purchaseRepo;
-        $this->productService = $productService;
     }
 
     /**
