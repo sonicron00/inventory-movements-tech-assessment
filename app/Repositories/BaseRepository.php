@@ -86,9 +86,12 @@ abstract class BaseRepository
         return $this->model->all();
     }
 
-    public function allWithRelation(string $relation): array
+    public function allWithRelation(array|string $relations): array
     {
-        return $this->model->with($relation)->orderBy('updated_at','desc')->get()->all();
+        if (gettype($relations) == 'array') {
+            $relations = "'" . implode("','", $relations) . "'";
+        }
+        return $this->model->with($relations)->orderBy('updated_at','desc')->get()->all();
     }
 
     /**

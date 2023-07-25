@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Repositories\ProductRepository;
 use App\Exceptions\InsufficientQuantityException;
+use Carbon\Carbon;
 
 class ProductService
 {
@@ -16,8 +17,10 @@ class ProductService
      */
 
 
-    public function __construct( private readonly ProductRepository $productRepo)
-    {
+    public function __construct(
+        private readonly ProductRepository $productRepo,
+        private readonly TransactionService $transactionService
+    ) {
     }
 
 
@@ -101,19 +104,76 @@ class ProductService
      * Get available quantity for a given product
      * Returns computed current quantity based on all transactions for the product
      * @param int $productId
+     * @param string|null $dataPoint
      * @return int
      */
-    private function getAvailableQuantityByProduct(int $productId): int
+    private function getAvailableQuantityByProduct(int $productId, string $dataPoint = null): int
     {
         $transactions = $this->productRepo->getAllTransactionsByProduct($productId);
         $quantity = 0;
         foreach ($transactions['applications'] as $application) {
-            $quantity += $application->quantity;
+            if (($dataPoint && $application->created_at < $dataPoint) || !$dataPoint) {
+                $quantity += $application->quantity;
+            }
         }
         foreach ($transactions['purchases'] as $purchase) {
-            $quantity += $purchase->qty_purchased;
+            if (($dataPoint && $purchase->created_at < $dataPoint) || !$dataPoint) {
+                $quantity += $purchase->qty_purchased;
+            }
         }
         return $quantity;
+    }
+
+    /**
+     * Get cumulative quantity on hand - for month period, by product (or all)
+     * Returns computed monthly quantity held at each datapoint (month)
+     * @param int $months
+     * @param int|null $productId
+     * @return array
+     */
+    public function getRollingInventoryByMonth(int $months, int $productId = null): array
+    {
+        $allTransactions = $this->transactionService->getAllTransactions();
+        $rangeStart = Carbon::now()->subMonths($months);
+        $startingQty = 0;
+        if (!$productId) {
+            $products = $this->productRepo->all();
+            foreach ($products as $product) {
+                $startingQty += $this->getAvailableQuantityByProduct($product->id, $rangeStart);
+            }
+        }
+        if ($productId) {
+            $startingQty += $this->getAvailableQuantityByProduct($productId, $rangeStart);
+        }
+        $monthTicker = $months - 1;
+        $monthsArray = [];
+        $dataArray = [];
+        $rollingBalance = $startingQty;
+        while ($monthTicker >= 0) {
+            $monthNetMovement = 0;
+            $monthStart = Carbon::now()->subMonths($monthTicker)->startOfMonth();
+            $monthEnd = Carbon::now()->subMonths($monthTicker)->endOfMonth();
+            foreach ($allTransactions as $transaction) {
+                if (!$productId) {
+                    if ($transaction->transaction_date > $monthStart && $transaction->transaction_date < $monthEnd) {
+                        $monthNetMovement += $transaction->qty;
+                    }
+                }
+                if ($productId) {
+                    if ($transaction->product_id == $productId &&
+                        $transaction->transaction_date > $monthStart &&
+                        $transaction->transaction_date < $monthEnd) {
+                        $monthNetMovement += $transaction->qty;
+                    }
+                }
+            }
+            $monthPosition = $rollingBalance + $monthNetMovement;
+            $monthsArray[] = Carbon::now()->subMonths($monthTicker)->shortMonthName .'-'. Carbon::now()->subMonths($monthTicker)->year;
+            $dataArray[] = $monthPosition;
+            $rollingBalance += $monthPosition;
+            $monthTicker--;
+        }
+        return array('months' => $monthsArray, 'data' => $dataArray);
     }
 
 }

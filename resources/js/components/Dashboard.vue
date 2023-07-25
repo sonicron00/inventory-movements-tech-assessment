@@ -1,0 +1,142 @@
+<template>
+  <v-container>
+    <v-row>
+      <h2>Inventory Dashboard</h2>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>
+            <v-icon
+                class="mr-5"
+                size="64"
+            >
+            </v-icon>
+            <v-layout
+                column
+                align-start
+            >
+              <strong>Trend Line - Monthly Units on Hand</strong>
+              <div>
+                <v-container fluid grid-list-xl>
+                  <v-layout wrap align-center>
+                    <v-flex xs6 sm4 d-flex>
+                      <v-select
+                          v-model="selectedProduct"
+                          id="selectedProduct"
+                          :items="products"
+                          item-value="id"
+                          item-text="description"
+                          return-object
+                          label="All products"
+                          solo
+                      ></v-select>
+                    </v-flex>
+                    <v-flex xs6 sm4 d-flex>
+                      <v-text-field
+                          v-model="selectedMonths"
+                          label="Months to display"
+                          single-line
+                          type="number"
+                          solo
+                      />
+                    </v-flex>
+                    <v-flex xs6 sm4 d-flex>
+                      <v-btn variant="outlined" style="margin-top: -20px;" @click="refreshGraph">Refresh</v-btn>
+                    </v-flex>
+                  </v-layout>
+                </v-container>
+              </div>
+            </v-layout>
+
+            <v-spacer></v-spacer>
+
+            <v-btn icon class="align-self-start" size="28">
+              <v-icon>mdi-arrow-right-thick</v-icon>
+            </v-btn>
+          </v-card-title>
+
+          <v-sheet color="transparent">
+            <v-sparkline
+                :key="String(avg)"
+                :smooth="16"
+                :gradient="['#f72047', '#ffd200', '#1feaea']"
+                :line-width="3"
+                :value="datedValues"
+                :labels="months"
+                auto-draw
+                stroke-linecap="round"
+            >
+            </v-sparkline>
+          </v-sheet>
+        </v-card>
+      </v-col>
+      </v-row>
+  </v-container>
+</template>
+<script>
+export default {
+  name: "Dashboard",
+  data: () => ({
+    selectedMonths: 12,
+    selectedProduct: null,
+    products: [],
+    value: [
+      423,
+      446,
+      675,
+      510,
+      590,
+      610,
+      760
+    ],
+    datedValues: [],
+    months: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+  }),
+  mounted() {
+    this.getProductData();
+    this.getProducts();
+  },
+  computed: {
+    avg() {
+      const sum = this.datedValues.reduce((acc, cur) => acc + cur, 0)
+      const length = this.datedValues.length
+      if (!sum && !length) return 0
+      return Math.ceil(sum / length)
+    }
+  },
+  methods: {
+    refreshGraph() {
+      this.getProductData();
+    },
+    async getProductData() {
+      let productId = null;
+      if (this.selectedProduct) {
+        productId = this.selectedProduct.productID
+      }
+      let endpoint = '/api/products/monthly/' + this.selectedMonths + '/' + productId;
+
+      await this.axios.get(endpoint).then(response => {
+        this.datedValues = response.data;
+        console.log(response.data);
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    async getProducts() {
+      await this.axios.get('/api/products').then(response => {
+        this.products = response.data
+      }).catch(error => {
+        console.log(error)
+      })
+    }
+  }
+}
+</script>
+
+<style>
+.v-sheet--offset {
+  top: -24px;
+  position: relative;
+}
+</style>

@@ -1,4 +1,5 @@
 <template>
+  <v-container>
   <div class="accordion" role="tablist">
 
     <div>
@@ -14,8 +15,10 @@
         </b-collapse>
       </b-card>
     </div>
-
   </div>
+
+  </v-container>
+
 </template>
 
 <script>

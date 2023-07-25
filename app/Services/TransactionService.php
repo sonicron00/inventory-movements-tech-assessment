@@ -18,7 +18,6 @@ class TransactionService
     public function __construct(
         public ApplicationRepository $appRepo,
         public PurchaseRepository $purchaseRepo,
-        public ProductService $productService
     ) {
     }
 
@@ -93,7 +92,6 @@ class TransactionService
             ];
         }
         foreach ($this->getAllPurchases() as $purchase) {
-            logger($purchase);
             $allTransactionsFormatted[] = (object)[
                 'product_id' => $purchase['product_id'],
                 'transaction_date' => $purchase['transaction_date'],

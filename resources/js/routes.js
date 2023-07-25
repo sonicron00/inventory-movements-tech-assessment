@@ -11,12 +11,12 @@ const NewProposal = () => import('./components/NewProposal.vue');
 export const routes = [
     {
         name: 'home',
-        path: '/',
+        path: '/landing',
         component: Welcome
     },
     {
         name: 'main',
-        path: '/landing',
+        path: '/',
         component: Home
     },
     {

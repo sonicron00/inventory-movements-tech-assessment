@@ -20,6 +20,7 @@ class ProductRepository extends BaseRepository
         parent::__construct($model);
     }
 
+
     /**
      * Get all transactions for a given product
      * Returns all application and purchase transactions
@@ -31,8 +32,8 @@ class ProductRepository extends BaseRepository
         $transactionArray = [];
         $productApplications = $this->find($productId)->applications();
         $productPurchases = $this->find($productId)->purchases();
-        $transactionArray['applications'] = $productApplications->get();
-        $transactionArray['purchases'] = $productPurchases->get();
+        $transactionArray['applications'] = $productApplications->orderBy('transaction_date', 'ASC')->get();
+        $transactionArray['purchases'] = $productPurchases->orderBy('transaction_date', 'ASC')->get();
         return $transactionArray;
     }
 

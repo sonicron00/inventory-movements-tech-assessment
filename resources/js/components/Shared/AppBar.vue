@@ -2,10 +2,7 @@
   <div>
     <v-app-bar color="deep-purple accent-4" app clipped-left dense dark>
       <v-toolbar-title>Figured x Ryan - 2023 GLOW-UP</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <font-awesome-icon icon="fa-solid fa-user-secret" />
     </v-app-bar>
-
     <v-navigation-drawer
         app
         clipped
@@ -35,14 +32,14 @@ export default {
           hiddenOnCollapse: true
         },
         {
-          href: '/landing',
+          href: '/',
           title: 'Home'
         },
         {
           title: 'Original Assessment',
           child: [
             {
-              href: '/',
+              href: '/landing',
               title: 'Product Application Calculator',
               hiddenOnCollapse: false
             },

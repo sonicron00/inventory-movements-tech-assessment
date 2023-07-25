@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InsufficientQuantityException;
 use App\Services\ProductService;
 
 class ProductController extends Controller
@@ -17,6 +18,9 @@ class ProductController extends Controller
         return $this->productService->getAllProductsWithQuantity();
     }
 
+    /**
+     * @throws InsufficientQuantityException
+     */
     public function calculateQuantity(int $productId, int $quantity): float
     {
         return $this->productService->computeFifoValueByQuantityAndProduct($productId, $quantity);
@@ -25,6 +29,11 @@ class ProductController extends Controller
     public function createOrUpdate(string $description, int $productId = 0): void
     {
         $this->productService->createOrUpdateProduct($productId, $description);
+    }
+
+    public function getProductValueByMonth(int $months): array
+    {
+        return $this->productService->getRollingInventoryByMonth($months, null);
     }
 
 }
