@@ -68,7 +68,7 @@ export default {
               href: '/new-bonus',
               title: 'New Info',
               hiddenOnCollapse: false
-            },
+            }
           ]
         }
       ]
