@@ -71,7 +71,7 @@
                 auto-draw
                 stroke-linecap="round"
                 gradient-direction="bottom"
-                label-size="2"
+                label-size="3"
             >
             </v-sparkline>
           </v-sheet>

@@ -31,9 +31,13 @@ class ProductController extends Controller
         $this->productService->createOrUpdateProduct($productId, $description);
     }
 
-    public function getProductValueByMonth(int $months): array
+    public function getProductValueByMonth(int $months, int|string $productId): array
     {
-        return $this->productService->getRollingInventoryByMonth($months, null);
+        $formatProdId = null;
+        if ($productId !== "null") {
+            $formatProdId = $productId;
+        }
+        return $this->productService->getRollingInventoryByMonth($months, $formatProdId);
     }
 
 }

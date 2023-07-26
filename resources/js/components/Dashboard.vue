@@ -81,15 +81,6 @@ export default {
     selectedMonths: 12,
     selectedProduct: null,
     products: [],
-    value: [
-      423,
-      446,
-      675,
-      510,
-      590,
-      610,
-      760
-    ],
     datedValues: [],
     months: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
   }),

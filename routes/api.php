@@ -24,7 +24,7 @@ Route::group(
     [],
     function () {
         Route::get('/products', 'ProductController@getProducts');
-        Route::get('products/monthly/{months}/{id}', 'ProductController@getProductValueByMonth');
+        Route::get('/products/monthly/{months}/{id}', 'ProductController@getProductValueByMonth');
         Route::get('/products/preapply/{id}/{qty}', 'ProductController@calculateQuantity');
         Route::put('/products/edit/{descr}/{id}', 'ProductController@createOrUpdate');
         Route::get('/questions', 'QuestionController@getQuestions');

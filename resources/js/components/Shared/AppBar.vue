@@ -7,16 +7,17 @@
         app
         clipped
         permanent
-    ><sidebar-menu :menu="menu" show-child="true">
-      <span slot="dropdown-icon"></span>
-    </sidebar-menu>
+    >
+      <sidebar-menu :menu="menu" show-child="true">
+        <span slot="dropdown-icon"></span>
+      </sidebar-menu>
     </v-navigation-drawer>
 
   </div>
 </template>
 
 <script>
-import { SidebarMenu } from 'vue-sidebar-menu'
+import {SidebarMenu} from 'vue-sidebar-menu'
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 export default {
@@ -76,3 +77,10 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.v-toolbar__title {
+  font-weight: 900;
+  font-size: 27px;
+}
+</style>

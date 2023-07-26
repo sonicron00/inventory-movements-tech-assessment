@@ -16,27 +16,26 @@
             <b-overlay :show="isLoading" rounded="sm">
               <b-table ref="productTable" :items="products" :fields="fields">
                 <template #cell(description)="data">
-                  <b-form-input v-if="products[data.index].isEdit" type="text"
-                                v-model="products[data.index].description"></b-form-input>
+                  <v-text-field v-if="products[data.index].isEdit" type="number"
+                                v-model="products[data.index].description"></v-text-field>
                   <span v-else>{{ data.value }}</span>
                 </template>
                 <template #cell(apply)="data">
-                  <input type="number" min="0" v-model="products[data.index].requestedQuantity"
+                  <input type="number" class="tableInput" min="0" v-model="products[data.index].requestedQuantity"
                          @change="quantityChanged(data)">
-                  <button type="button"
+                  <v-btn
+                          elevation="4"
                           @click="getPriceForQuantity(data)"
-                          class="btn btn-info">
-                    Calculate
-                  </button>
-                  <h4 v-if="products[data.index].showPrice">Value: ${{ products[data.index].calculatedPrice }}</h4>
-                  <button v-if="products[data.index].showPrice" @click="applyQuantity(data)"
+                    >Calculate
+                  </v-btn>
+                  <h4 style="padding-top:5px;" v-if="products[data.index].showPrice">Value: ${{ Number(products[data.index].calculatedPrice).toLocaleString("en-US") }}</h4>
+                  <v-btn v-if="products[data.index].showPrice" @click="applyQuantity(data)"
+                         type="button"
+                         >Apply</v-btn>
+                  <v-btn v-if="products[data.index].showPrice" @click="quantityChanged(data)"
                           type="button"
-                          class="btn btn-primary">Apply
-                  </button>
-                  <button v-if="products[data.index].showPrice" @click="quantityChanged(data)"
-                          type="button"
-                          class="btn btn-danger">Cancel
-                  </button>
+                          >Cancel
+                  </v-btn>
                   <b-alert
                       :show="products[data.index].invalidQty"
                       variant="warning"
@@ -49,10 +48,10 @@
                   </b-alert>
                 </template>
                 <template #cell(edit)="data">
-                  <b-button @click="editRowHandler(data)">
+                  <v-btn @click="editRowHandler(data)">
                     <span v-if="!products[data.index].isEdit">Edit</span>
                     <span v-else>Save</span>
-                  </b-button>
+                  </v-btn>
                 </template>
               </b-table>
             </b-overlay>
@@ -184,7 +183,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 #app {
   text-align: center;
   margin: 60px;
@@ -200,4 +199,9 @@ pre {
   text-align: left;
   color: #d63384;
 }
+
+.tableInput {
+  border-style: solid;
+}
+
 </style>

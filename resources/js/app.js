@@ -13,7 +13,6 @@ import {routes} from './routes';
 import vuetify from './vuetify';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 
-import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)

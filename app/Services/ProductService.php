@@ -112,12 +112,12 @@ class ProductService
         $transactions = $this->productRepo->getAllTransactionsByProduct($productId);
         $quantity = 0;
         foreach ($transactions['applications'] as $application) {
-            if (($dataPoint && $application->created_at < $dataPoint) || !$dataPoint) {
+            if (($dataPoint && $application->transaction_date < $dataPoint) || !$dataPoint) {
                 $quantity += $application->quantity;
             }
         }
         foreach ($transactions['purchases'] as $purchase) {
-            if (($dataPoint && $purchase->created_at < $dataPoint) || !$dataPoint) {
+            if (($dataPoint && $purchase->transaction_date < $dataPoint) || !$dataPoint) {
                 $quantity += $purchase->qty_purchased;
             }
         }
@@ -170,8 +170,9 @@ class ProductService
             $monthPosition = $rollingBalance + $monthNetMovement;
             $monthsArray[] = Carbon::now()->subMonths($monthTicker)->shortMonthName .'-'. Carbon::now()->subMonths($monthTicker)->year;
             $dataArray[] = $monthPosition;
-            $rollingBalance += $monthPosition;
+            $rollingBalance += $monthNetMovement;
             $monthTicker--;
+
         }
         return array('months' => $monthsArray, 'data' => $dataArray);
     }
