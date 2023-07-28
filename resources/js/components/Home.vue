@@ -20,7 +20,7 @@
               <div>
                 <v-container fluid grid-list-xl>
                   <v-layout wrap align-center>
-                    <v-flex xs6 sm4 d-flex>
+                    <v-flex xs6 sm6 d-flex>
                       <v-select
                           v-model="selectedProduct"
                           id="selectedProduct"
@@ -32,6 +32,7 @@
                           solo
                           hint="Select a product"
                           persistent-hint=true
+                          @change="refreshGraph"
                       ></v-select>
                     </v-flex>
                     <v-flex xs6 sm4 d-flex>
@@ -43,10 +44,8 @@
                           hint="Number of months to show history"
                           persistent-hint=true
                           solo
+                          @change="refreshGraph"
                       />
-                    </v-flex>
-                    <v-flex xs6 sm4 d-flex>
-                      <v-btn variant="outlined" style="margin-top: -20px;" @click="refreshGraph">Refresh</v-btn>
                     </v-flex>
                   </v-layout>
                 </v-container>

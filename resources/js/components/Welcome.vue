@@ -1,24 +1,16 @@
 <template>
-  <div class="container mt-5">
-    <div class="col-12 text-center">
-      <b-jumbotron>
-        <template #header>Product Availability</template>
-        <template #lead>
-          Application Calculator
-        </template>
-      </b-jumbotron>
-    </div>
-    <div class="container mt-5">
+  <v-container>
+  <PageBanner title="Product Availability" subtitle="Application Calculator"></PageBanner>
       <Products :can-apply="true" :can-edit="false"></Products>
-    </div>
-  </div>
+  </v-container>
 </template>
 
 <script>
 import Products from "./Products";
+import PageBanner from "./Shared/PageBanner.vue";
 
 export default {
   name: "Welcome.vue",
-  components: {Products}
+  components: {Products, PageBanner},
 }
 </script>

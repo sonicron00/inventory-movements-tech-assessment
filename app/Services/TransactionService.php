@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Repositories\ApplicationRepository;
 use App\Repositories\PurchaseRepository;
+use Carbon\Carbon;
 
 
 class TransactionService
@@ -33,6 +34,7 @@ class TransactionService
         $transactionCreatePayload['type'] = 'Application';
         $transactionCreatePayload['product_id'] = $productId;
         $transactionCreatePayload['quantity'] = $quantity * -1;
+        $transactionCreatePayload['transaction_date'] = Carbon::now()->format('y-m-d');
 
         $this->createTransaction($transactionCreatePayload);
     }
@@ -44,6 +46,7 @@ class TransactionService
         $transactionCreatePayload['product_id'] = $productId;
         $transactionCreatePayload['qty_purchased'] = $quantity;
         $transactionCreatePayload['price'] = $price;
+        $transactionCreatePayload['transaction_date'] = Carbon::now()->format('y-m-d');
 
         $this->createTransaction($transactionCreatePayload);
     }

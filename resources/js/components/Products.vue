@@ -1,22 +1,12 @@
 <template>
-  <div>
-    <div class="row">
-      <div class="col-12">
-        <div class="col-12 text-center">
-          <b-jumbotron v-if="canEdit" >
-            <template #header>Inventory</template>
-            <template #lead>
-              Inventory product management
-            </template>
-            <hr class="my-4">
-            <b-button v-if="!editMode" class="add-button" variant="success" @click="addRowHandler">Add Item</b-button>
-            <b-button v-if="editMode" variant="warning" @click="cancelAdd">Cancel</b-button>
-          </b-jumbotron>
+  <v-container>
+    <PageBanner v-if="canEdit" title="Inventory" subtitle="Inventory product management" :actions="actionButtons"
+                @clickAction="actionClick"></PageBanner>
           <div class="card-body">
             <b-overlay :show="isLoading" rounded="sm">
               <b-table ref="productTable" :items="products" :fields="fields">
                 <template #cell(description)="data">
-                  <v-text-field v-if="products[data.index].isEdit" type="number"
+                  <v-text-field v-if="products[data.index].isEdit" type="text"
                                 v-model="products[data.index].description"></v-text-field>
                   <span v-else>{{ data.value }}</span>
                 </template>
@@ -56,16 +46,15 @@
               </b-table>
             </b-overlay>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  </v-container>
 </template>
 
 <script>
+import PageBanner from "./Shared/PageBanner.vue";
 export default {
   name: "products",
   props: ["canEdit", "canApply"],
+  components: {PageBanner},
   data() {
     return {
       products: [],
@@ -73,11 +62,20 @@ export default {
       requestedQuantity: 0,
       isLoading: false,
       editMode: false,
+      showBanner: true,
       fields: [
         {key: "productID", label: "ID"},
         {key: "description", label: "Description"},
         {key: "quantity", label: "Quantity (Units)"},
       ],
+    }
+  },
+  computed: {
+    actionButtons() {
+      if (!this.editMode) {
+        return ['Add New Product']
+      }
+      return ['Cancel']
     }
   },
   mounted() {
@@ -90,6 +88,14 @@ export default {
     this.getProducts();
   },
   methods: {
+    actionClick(value) {
+      if (value === 'Add New Product') {
+        this.addRowHandler();
+      }
+      if (value === 'Cancel') {
+        this.cancelAdd();
+      }
+    },
     editRowHandler(data) {
       if (this.products[data.index].isEdit) {
         this.createOrUpdateProduct(this.products[data.index].description, this.products[data.index].productID);

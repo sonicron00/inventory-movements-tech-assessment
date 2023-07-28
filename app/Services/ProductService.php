@@ -59,7 +59,7 @@ class ProductService
 
     /**
      * Compute 'FIFO' (first in first out) value for requested application quantity
-     * Returns an monetary value being the requested application quantity calculated
+     * Returns a monetary value being the requested application quantity calculated
      * from utilising purchase prices on a FIFO basis
      * By requesting all purchases in date ascending order
      * @param int $productId

@@ -1,15 +1,8 @@
 <template>
-  <div>
-    <div class="col-12 text-center">
-      <b-jumbotron>
-        <template #header>Transactions</template>
-        <template #lead>
-          Manual input for purchase transactions
-        </template>
-        <hr class="my-4">
-        <b-button v-if="!editMode" class="add-button" variant="success" @click="addRowHandler">Enter Purchase</b-button>
-        <b-button v-if="editMode" variant="warning" @click="cancelAdd">Cancel</b-button>
-      </b-jumbotron>
+  <v-container>
+    <PageBanner title="Transactions" subtitle="Manual input for purchase transactions" :actions="actionButtons"
+                @clickAction="actionClick"></PageBanner>
+    <div class="col-12 text-center" v-if="dismissCountDown">
       <b-alert
           :show="dismissCountDown"
           dismissible
@@ -30,68 +23,70 @@
       <p class="mt-3">Current Page: {{ currentPage }} of {{ pageCount }}</p>
       <b-overlay :show="isLoading" rounded="sm">
         <b-form-group>
-        <b-input-group size="sm">
-          <b-form-input
-              id="filter-input"
-              v-model="filter"
-              type="search"
-              placeholder="Search by product name"
-          ></b-form-input>
-        </b-input-group>
+          <b-input-group size="sm">
+            <b-form-input
+                id="filter-input"
+                v-model="filter"
+                type="search"
+                placeholder="Search by product name"
+            ></b-form-input>
+          </b-input-group>
         </b-form-group>
-      <b-pagination
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="tran-table"
-          class="mt-4"
-      ></b-pagination>
-      <b-table
-          id="tran-table"
-          :items="transactions"
-          :fields="fields"
-          :sort-by.sync="sortBy"
-          :sort-desc.sync="sortDesc"
-          :total-rows="rows"
-          :per-page="perPage"
-          :current-page="currentPage"
-          :filter="filter"
-          filter-included-fields="product_descr"
-          responsive="sm"
-      >
-        <template #cell(product_id)="data">
-          <b-form-input v-if="transactions[data.index].isEdit" type="number"
-                        v-model="transactions[data.index].product_id"></b-form-input>
-          <span v-else>{{ data.value }}</span>
-        </template>
-        <template #cell(transaction_type)="data">
-          <b-form-input readonly v-if="transactions[data.index].isEdit" type="text" value="Purchase"></b-form-input>
-          <span v-else>{{ data.value }}</span>
-        </template>
-        <template #cell(qty)="data">
-          <b-form-input v-if="transactions[data.index].isEdit" type="number"
-                        v-model="transactions[data.index].qty"></b-form-input>
-          <span v-else>{{ data.value }}</span>
-        </template>
-        <template #cell(price)="data">
-          <b-form-input v-if="transactions[data.index].isEdit" type="number"
-                        v-model="transactions[data.index].price"></b-form-input>
-          <span v-else>{{ data.value }}</span>
-        </template>
-        <template #cell(edit)="data">
-          <b-button v-if="transactions[data.index].isEdit" @click="recordPurchase(data)">Save</b-button>
-        </template>
-      </b-table>
+        <b-pagination
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="tran-table"
+            class="mt-4"
+        ></b-pagination>
+        <b-table
+            id="tran-table"
+            :items="transactions"
+            :fields="fields"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
+            :total-rows="rows"
+            :per-page="perPage"
+            :current-page="currentPage"
+            :filter="filter"
+            filter-included-fields="product_descr"
+            responsive="sm"
+        >
+          <template #cell(product_id)="data">
+            <b-form-input v-if="transactions[data.index].isEdit" type="number"
+                          v-model="transactions[data.index].product_id"></b-form-input>
+            <span v-else>{{ data.value }}</span>
+          </template>
+          <template #cell(transaction_type)="data">
+            <b-form-input readonly v-if="transactions[data.index].isEdit" type="text" value="Purchase"></b-form-input>
+            <span v-else>{{ data.value }}</span>
+          </template>
+          <template #cell(qty)="data">
+            <b-form-input v-if="transactions[data.index].isEdit" type="number"
+                          v-model="transactions[data.index].qty"></b-form-input>
+            <span v-else>{{ data.value }}</span>
+          </template>
+          <template #cell(price)="data">
+            <b-form-input v-if="transactions[data.index].isEdit" type="number"
+                          v-model="transactions[data.index].price"></b-form-input>
+            <span v-else>{{ data.value }}</span>
+          </template>
+          <template #cell(edit)="data">
+            <v-btn color="#78be20" v-if="transactions[data.index].isEdit" @click="recordPurchase(data)">Save</v-btn>
+          </template>
+        </b-table>
       </b-overlay>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script>
+import PageBanner from "./Shared/PageBanner.vue";
 import Alert from './Shared/Alert.vue'
+
 export default {
   name: "Transactions",
-  components: {Alert},
+  components: {PageBanner, Alert},
   data() {
     return {
       sortBy: 'transaction_date',
@@ -124,9 +119,23 @@ export default {
     },
     pageCount() {
       return Math.ceil(this.transactions.length / this.perPage);
+    },
+    actionButtons() {
+      if (!this.editMode) {
+        return ['Enter Purchase']
+      }
+      return ['Cancel']
     }
   },
   methods: {
+    actionClick(value) {
+      if (value === 'Enter Purchase') {
+        this.addRowHandler();
+      }
+      if (value === 'Cancel') {
+        this.cancelAdd();
+      }
+    },
     async getTransactions() {
       this.isLoading = true;
       await this.axios.get('/api/transactions').then(response => {

@@ -4,7 +4,7 @@
       <div class="col-12">
         <div class="card">
           <div class="card-header">
-            <h4>Welcome</h4>
+            <h4>What is this all about?</h4>
           </div>
           <b-container class="bv-example-row">
             <b-row>
