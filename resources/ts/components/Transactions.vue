@@ -1,0 +1,188 @@
+<template>
+  <v-container>
+    <PageBanner title="Transactions" subtitle="Manual input for purchase transactions" :actions="actionButtons"
+                @clickAction="actionClick"></PageBanner>
+    <div class="col-12 text-center" v-if="dismissCountDown">
+      <b-alert
+          :show="dismissCountDown"
+          dismissible
+          variant="success"
+          @dismissed="dismissCountDown=0"
+          @dismiss-count-down="countDownChanged"
+      >
+        <p>Transaction successfully recorded!</p>
+        <b-progress
+            variant="success"
+            :max="dismissSecs"
+            :value="dismissCountDown"
+            height="4px"
+        ></b-progress>
+      </b-alert>
+    </div>
+    <div class="overflow-auto">
+      <p class="mt-3">Current Page: {{ currentPage }} of {{ pageCount }}</p>
+      <b-overlay :show="isLoading" rounded="sm">
+        <b-form-group>
+          <b-input-group size="sm">
+            <b-form-input
+                id="filter-input"
+                v-model="filter"
+                type="search"
+                placeholder="Search by product name"
+            ></b-form-input>
+          </b-input-group>
+        </b-form-group>
+        <b-pagination
+            v-model="currentPage"
+            :total-rows="rows"
+            :per-page="perPage"
+            aria-controls="tran-table"
+            class="mt-4"
+        ></b-pagination>
+        <b-table
+            id="tran-table"
+            :items="transactions"
+            :fields="fields"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
+            :total-rows="rows"
+            :per-page="perPage"
+            :current-page="currentPage"
+            :filter="filter"
+            filter-included-fields="product_descr"
+            responsive="sm"
+        >
+          <template #cell(product_id)="data">
+            <b-form-input v-if="transactions[data.index].isEdit" type="number"
+                          v-model="transactions[data.index].product_id"></b-form-input>
+            <span v-else>{{ data.value }}</span>
+          </template>
+          <template #cell(transaction_type)="data">
+            <b-form-input readonly v-if="transactions[data.index].isEdit" type="text" value="Purchase"></b-form-input>
+            <span v-else>{{ data.value }}</span>
+          </template>
+          <template #cell(qty)="data">
+            <b-form-input v-if="transactions[data.index].isEdit" type="number"
+                          v-model="transactions[data.index].qty"></b-form-input>
+            <span v-else>{{ data.value }}</span>
+          </template>
+          <template #cell(price)="data">
+            <b-form-input v-if="transactions[data.index].isEdit" type="number"
+                          v-model="transactions[data.index].price"></b-form-input>
+            <span v-else>{{ data.value }}</span>
+          </template>
+          <template #cell(edit)="data">
+            <v-btn color="#78be20" v-if="transactions[data.index].isEdit" @click="recordPurchase(data)">Save</v-btn>
+          </template>
+        </b-table>
+      </b-overlay>
+    </div>
+  </v-container>
+</template>
+
+<script>
+import PageBanner from "./Shared/PageBanner.vue";
+import Alert from './Shared/Alert.vue'
+
+export default {
+  name: "Transactions",
+  components: {PageBanner, Alert},
+  data() {
+    return {
+      sortBy: 'transaction_date',
+      filter: null,
+      sortDesc: false,
+      perPage: 15,
+      currentPage: 1,
+      editMode: false,
+      dismissSecs: 10,
+      dismissCountDown: 0,
+      isLoading: false,
+      fields: [
+        {key: 'product_id', sortable: true},
+        {key: 'transaction_date', sortable: true},
+        {key: 'transaction_type', sortable: true},
+        {key: 'product_descr', sortable: false},
+        {key: 'qty', sortable: false},
+        {key: 'price', sortable: false},
+        {key: 'edit', label: ''}
+      ],
+      transactions: []
+    }
+  },
+  mounted() {
+    this.getTransactions()
+  },
+  computed: {
+    rows() {
+      return this.transactions.length;
+    },
+    pageCount() {
+      return Math.ceil(this.transactions.length / this.perPage);
+    },
+    actionButtons() {
+      if (!this.editMode) {
+        return ['Enter Purchase']
+      }
+      return ['Cancel']
+    }
+  },
+  methods: {
+    actionClick(value) {
+      if (value === 'Enter Purchase') {
+        this.addRowHandler();
+      }
+      if (value === 'Cancel') {
+        this.cancelAdd();
+      }
+    },
+    async getTransactions() {
+      this.isLoading = true;
+      await this.axios.get('/api/transactions').then(response => {
+        this.transactions = response.data
+        this.isLoading = false;
+      }).catch(error => {
+        console.log(error)
+        this.transactions = [];
+        this.isLoading = false;
+      })
+    },
+    countDownChanged(dismissCountDown) {
+      this.dismissCountDown = dismissCountDown
+    },
+    recordPurchase(data) {
+      this.transactions[data.index].isEdit = !this.transactions[data.index].isEdit;
+      this.createPurchase(this.transactions[data.index].product_id, this.transactions[data.index].qty, this.transactions[data.index].price);
+    },
+    inputHandler(value, index, key) {
+      this.transactions[index][key] = value;
+      this.$set(this.transactions, index, this.transactions[index]);
+      this.$emit("input", this.transactions);
+    },
+    addRowHandler() {
+      this.sortBy = 'transaction_date';
+      this.sortDesc = false;
+      this.editMode = true;
+      const newRow = this.fields.reduce((a, c) => ({...a, [c.key]: null}), {})
+      newRow.isEdit = true;
+      this.transactions.unshift(newRow);
+      this.$emit('input', this.transactions);
+    },
+    cancelAdd() {
+      this.transactions.splice(0, 1);
+      this.editMode = false;
+    },
+    createPurchase(productId, qty, price) {
+      this.axios.put(`/api/purchases/create/${productId}/${qty}/${price}`).then(response => {
+        this.getTransactions();
+        this.sortBy = 'transaction_date';
+        this.sortDesc = true;
+        this.editMode = false;
+        this.dismissCountDown = 10;
+      }).catch(error => {
+        console.log(error);
+      })
+    },
+  }
+}
+</script>
