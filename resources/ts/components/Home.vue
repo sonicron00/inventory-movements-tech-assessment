@@ -31,7 +31,7 @@
                           label="All products"
                           solo
                           hint="Select a product"
-                          persistent-hint=true
+                          :persistent-hint=true
                           @change="refreshGraph"
                       ></v-select>
                     </v-flex>
@@ -42,7 +42,7 @@
                           single-line
                           type="number"
                           hint="Number of months to show history"
-                          persistent-hint=true
+                          :persistent-hint=true
                           solo
                           @change="refreshGraph"
                       />

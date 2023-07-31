@@ -8,7 +8,7 @@
         clipped
         permanent
     >
-      <sidebar-menu :menu="menu" show-child="true">
+      <sidebar-menu :menu="menu" :show-child=child>
         <span slot="dropdown-icon"></span>
       </sidebar-menu>
     </v-navigation-drawer>
@@ -25,6 +25,7 @@ export default {
   components: {SidebarMenu},
   data() {
     return {
+      child: true,
       group: null,
       hover: false,
       menu: [
@@ -52,10 +53,10 @@ export default {
               href: '/transactions',
               title: 'Transactions'
             },
-            {
-              href: '/bonus',
-              title: 'Bonus'
-            }
+          //  {
+          //    href: '/bonus',
+          //    title: 'Bonus'
+          //  }
           ]
         },
         {

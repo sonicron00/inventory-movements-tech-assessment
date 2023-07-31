@@ -89,7 +89,7 @@ class TransactionService
                 'product_id' => $application['product_id'],
                 'transaction_date' => $application['transaction_date'],
                 'transaction_type' => 'Application',
-                'product_descr' => $application['products']['description'],
+                'product_descr' => $application['products']['description'] ?? 'deleted',
                 'qty' => $application['quantity'],
                 'price' => ''
             ];
@@ -99,7 +99,7 @@ class TransactionService
                 'product_id' => $purchase['product_id'],
                 'transaction_date' => $purchase['transaction_date'],
                 'transaction_type' => 'Purchase',
-                'product_descr' => $purchase['products']['description'],
+                'product_descr' => $purchase['products']['description'] ?? 'deleted',
                 'qty' => $purchase['qty_purchased'],
                 'price' => $purchase['price']
             ];

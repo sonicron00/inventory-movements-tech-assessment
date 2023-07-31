@@ -2,55 +2,62 @@
   <v-container>
     <PageBanner v-if="canEdit" title="Inventory" subtitle="Inventory product management" :actions="actionButtons"
                 @clickAction="actionClick"></PageBanner>
-          <div class="card-body">
-            <b-overlay :show="isLoading" rounded="sm">
-              <b-table ref="productTable" :items="products" :fields="fields">
-                <template #cell(description)="data">
-                  <v-text-field v-if="products[data.index].isEdit" type="text"
-                                v-model="products[data.index].description"></v-text-field>
-                  <span v-else>{{ data.value }}</span>
-                </template>
-                <template #cell(apply)="data">
-                  <input type="number" class="tableInput" min="0" v-model="products[data.index].requestedQuantity"
-                         @change="quantityChanged(data)">
-                  <v-btn
-                          elevation="4"
-                          @click="getPriceForQuantity(data)"
-                    >Calculate
-                  </v-btn>
-                  <h4 style="padding-top:5px;" v-if="products[data.index].showPrice">Value: ${{ Number(products[data.index].calculatedPrice).toLocaleString("en-US") }}</h4>
-                  <v-btn v-if="products[data.index].showPrice" @click="applyQuantity(data)"
-                         type="button"
-                         >Apply</v-btn>
-                  <v-btn v-if="products[data.index].showPrice" @click="quantityChanged(data)"
-                          type="button"
-                          >Cancel
-                  </v-btn>
-                  <b-alert
-                      :show="products[data.index].invalidQty"
-                      variant="warning"
-                  ><p>Quantity must be greater than zero</p>
-                  </b-alert>
-                  <b-alert
-                      :show="products[data.index].insufficientQty"
-                      variant="warning"
-                  ><p>Quantity to be applied exceeds the quantity on hand</p>
-                  </b-alert>
-                </template>
-                <template #cell(edit)="data">
-                  <v-btn @click="editRowHandler(data)">
-                    <span v-if="!products[data.index].isEdit">Edit</span>
-                    <span v-else>Save</span>
-                  </v-btn>
-                </template>
-              </b-table>
-            </b-overlay>
-          </div>
+    <v-card v-if="editMode">
+      <v-card-text>
+        <v-text-field label="Product description" v-model="newProductDescription"></v-text-field>
+        <v-text-field label="Opening quantity" type="number" v-model="newProductQty"></v-text-field>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" block @click="saveProduct()">Save Product</v-btn>
+      </v-card-actions>
+    </v-card>
+    <b-alert
+        :show="this.invalidQty"
+        variant="warning"
+    ><p>Quantity must be greater than zero</p>
+    </b-alert>
+    <b-alert
+        :show="this.insufficientQty"
+        variant="warning"
+    ><p>Quantity to be applied exceeds the quantity on hand</p>
+    </b-alert>
+    <v-data-table v-if="products.length > 1"
+      :headers="headers"
+      :items="products"
+      :loading="isLoading"
+      class="elevation-0">
+      <template v-if="this.canEdit" v-slot:[`item.description`]="{ item }">
+        <v-text-field v-if="item.isEdit" type="text" v-model="newProductDescription"></v-text-field>
+        <span v-else>{{ item.description }}</span>
+      </template>
+      <template v-if="this.canEdit" v-slot:[`item.actions`]="{ item }">
+        <v-btn v-if="!item.isEdit" @click="editRowHandler(item.productID, item.isEdit ?? false, item.description)">Edit</v-btn>
+        <v-btn v-if="item.isEdit" color="#78be20" @click="editRowHandler(item.productID, item.isEdit ?? false, item.description)">Save Changes</v-btn>
+        <v-btn v-if="item.isEdit" @click="cancelEditRow(item.productID)">Cancel</v-btn>
+      </template>
+      <template v-if="this.canApply" v-slot:[`item.apply`]="{ item }">
+        <v-btn v-if="!item.isEdit && item.quantity > 0" @click="editRowHandler(item.productID, item.isEdit ?? false)">Apply</v-btn>
+        <v-text-field v-if="item.isEdit" type="number" v-model="requestedQuantity"></v-text-field>
+        <v-btn v-if="item.isEdit && (item.calculatedPrice == 0 || !item.calculatedPrice)" @click="getPriceForQuantity(item.productID, item.quantity)">Calculate</v-btn>
+        <v-card v-if="item.calculatedPrice > 0" class="mx-auto" max-width="344" variant="outlined">
+          <v-card-text>
+            <div>
+              <div class="text-overline mb-1">Application Value</div>
+              <div class="text-h6 mb-1">NZD$ {{  item.calculatedPrice }}</div>
+            </div>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="#78be20" @click="applyQuantity(item.productID)">Confirm Application</v-btn>
+            <v-btn v-if="item.isEdit" @click="cancelEditRow(item.productID)">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+      </template>
+    </v-data-table>
   </v-container>
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import PageBanner from "./Shared/PageBanner.vue";
 export default {
   name: "products",
@@ -58,9 +65,12 @@ export default {
   components: {PageBanner},
   data() {
     return {
-      //products: [],
+      newProductDescription: '',
+      newProductQty: 0,
       calculatedPrice: 0,
       requestedQuantity: 0,
+      invalidQty: false,
+      insufficientQty: false,
       isLoading: false,
       editMode: false,
       showBanner: true,
@@ -69,6 +79,13 @@ export default {
         {key: "description", label: "Description"},
         {key: "quantity", label: "Quantity (Units)"},
       ],
+      headers: [
+        { text: "ID", value: "productID", sortable: true },
+        { text: "Description", value: "description"},
+        { text: "Quantity (Units)", value: "quantity", sortable: true  },
+        {text: "", value: "actions"},
+        {text: "", value: "apply"}
+      ]
     }
   },
   computed: {
@@ -83,19 +100,13 @@ export default {
     }
   },
   mounted() {
-    if (this.canApply) {
-      this.fields.push({key: 'apply', label: 'Calculate application value'});
-    }
-    if (this.canEdit) {
-      this.fields.push({key: 'edit', label: ''});
-    }
     if (!this.products.isLoaded) {
       this.loadProducts();
     }
-    //this.getProducts();
   },
   methods: {
-    ...mapActions("products", ["loadProducts"]),
+    ...mapActions("products", ["loadProducts", "createOrUpdateProduct", "calcPriceForQuantity", "commitApplication"]),
+    ...mapMutations("products", ["editProduct"]),
     actionClick(value) {
       if (value === 'Add New Product') {
         this.addRowHandler();
@@ -104,15 +115,21 @@ export default {
         this.cancelAdd();
       }
     },
-    editRowHandler(data) {
-      if (this.products[data.index].isEdit) {
-        this.createOrUpdateProduct(this.products[data.index].description, this.products[data.index].productID);
-        this.getProducts();
+    editRowHandler(productID, isEdit, descr?) {
+      if (isEdit) {
+        this.createOrUpdateProduct({"description": this.newProductDescription, "productID": productID});
+        this.newProductDescription = '';
+        return;
       }
-      this.products[data.index].isEdit = !this.products[data.index].isEdit;
+      this.newProductDescription = descr;
+      this.editProduct(productID);
+    },
+    cancelEditRow(productID) {
+      this.newProductDescription = '';
+      this.requestedQuantity = 0;
+      this.editProduct(productID);
     },
     cancelAdd() {
-      this.products.splice(0, 1);
       this.editMode = false;
     },
     inputHandler(value, index, key) {
@@ -122,76 +139,30 @@ export default {
     },
     addRowHandler() {
       this.editMode = true;
-      const newRow = this.fields.reduce((a, c) => ({...a, [c.key]: null}), {})
-      newRow.isEdit = true;
-      this.products.unshift(newRow);
-      this.$emit('input', this.products);
     },
-    async getProducts() {
-      this.isLoading = true;
-      await this.axios.get('/api/products').then(response => {
-        this.products = response.data;
-        this.products = this.products.map(item => ({...item, isEdit: false}));
-        this.isLoading = false;
-      }).catch(error => {
-        console.log(error)
-        this.products = [];
-        this.isLoading = false;
-      })
+    saveProduct() {
+      this.createOrUpdateProduct({"productID": 0,"description": this.newProductDescription, "qty": this.newProductQty});
+      this.newProductDescription = '';
+      this.newProductQty = 0;
+      this.editMode = false;
     },
-    createOrUpdateProduct(description, id) {
-      this.isLoading = true;
-      let payloadId = 0;
-      if (id != null) {
-        payloadId = id;
-      } // If we pass 0 we will create a new item
-      this.axios.put(`/api/products/edit/${description}/${payloadId}`).then(response => {
-        this.getProducts();
-        this.isLoading = false;
-        this.editMode = false;
-      }).catch(error => {
-        console.log(error);
-        this.isLoading = false;
-      })
-    },
-    getPriceForQuantity(data) {
-      if (this.products[data.index].requestedQuantity <= 0) {
-        this.products[data.index].invalidQty = true;
-        this.$refs.productTable.refresh();
+    getPriceForQuantity(productID, quantity) {
+      this.invalidQty = false;
+      this.insufficientQty = false;
+      if (this.requestedQuantity <= 0) {
+        this.invalidQty = true;
         return;
       }
-      if (this.products[data.index].requestedQuantity > this.products[data.index].quantity) {
-        this.products[data.index].insufficientQty = true;
-        this.$refs.productTable.refresh();
+      if (this.requestedQuantity > quantity) {
+        this.insufficientQty = true;
         return;
       }
-      this.isLoading = true;
-      this.axios.get(`/api/products/preapply/${this.products[data.index].productID}/${this.products[data.index].requestedQuantity}`).then(response => {
-        this.products[data.index].calculatedPrice = response.data;
-        this.products[data.index].showPrice = true;
-        this.$refs.productTable.refresh();
-        this.isLoading = false;
-      }).catch(error => {
-        this.isLoading = false;
-        console.log(error);
-      })
+      this.calcPriceForQuantity({"productID": productID, "requestedQuantity": this.requestedQuantity});
+
     },
-    applyQuantity(data) {
-      this.isLoading = true;
-      this.axios.put(`/api/products/apply/${this.products[data.index].productID}/${this.products[data.index].requestedQuantity}`).then(response => {
-        this.getProducts();
-        this.products[data.index].showPrice = false;
-        this.isLoading = false;
-      }).catch(error => {
-        this.isLoading = false;
-        console.log(error);
-      })
-    },
-    quantityChanged(data) {
-      this.products[data.index].showPrice = false;
-      this.products[data.index].invalidQty = false;
-      this.products[data.index].insufficientQty = false;
-      this.$refs.productTable.refresh();
+    applyQuantity(productID) {
+      this.commitApplication({"productID": productID, "quantity": this.requestedQuantity});
+      this.requestedQuantity = 0;
     },
   }
 }

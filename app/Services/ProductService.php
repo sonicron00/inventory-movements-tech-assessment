@@ -52,9 +52,9 @@ class ProductService
         return $productDetail;
     }
 
-    public function createOrUpdateProduct(int $productId, string $description): void
+    public function createOrUpdateProduct(int $productId, string $description): mixed
     {
-        $this->productRepo->updateOrCreate(['id' => $productId], ['description' => $description]);
+        return $this->productRepo->updateOrCreate(['id' => $productId], ['description' => $description]);
     }
 
     /**
