@@ -74,11 +74,6 @@ export default {
       isLoading: false,
       editMode: false,
       showBanner: true,
-      fields: [
-        {key: "productID", label: "ID"},
-        {key: "description", label: "Description"},
-        {key: "quantity", label: "Quantity (Units)"},
-      ],
       headers: [
         { text: "ID", value: "productID", sortable: true },
         { text: "Description", value: "description"},

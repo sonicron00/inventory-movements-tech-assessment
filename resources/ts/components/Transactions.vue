@@ -19,6 +19,25 @@
         ></b-progress>
       </b-alert>
     </div>
+      <v-card v-if="prodInput" class="mx-auto" max-width="344" variant="outlined">
+        <v-card-text>
+          <v-select
+              v-model="selectedProduct"
+              id="selectedProduct"
+              :items="products"
+              item-value="id"
+              item-text="description"
+              return-object
+              solo
+              label="Select a product"
+          ></v-select>
+          <v-text-field label="Purchase quantity" type="number" v-model="purchaseQty"></v-text-field>
+          <v-text-field label="Purchase price" type="number" v-model="purchasePrice"></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="#78be20" :disabled="this.purchasePrice === 0 || this.purchaseQty === 0 || !this.selectedProduct" block @click="recordPurchase">Record purchase</v-btn>
+        </v-card-actions>
+      </v-card>
     <div class="overflow-auto">
       <p class="mt-3">Current Page: {{ currentPage }} of {{ pageCount }}</p>
       <b-overlay :show="isLoading" rounded="sm">
@@ -32,14 +51,14 @@
             ></b-form-input>
           </b-input-group>
         </b-form-group>
-        <b-pagination
+        <b-pagination v-if="this.transactions.length > 1"
             v-model="currentPage"
             :total-rows="rows"
             :per-page="perPage"
             aria-controls="tran-table"
             class="mt-4"
         ></b-pagination>
-        <b-table
+        <b-table v-if="this.transactions.length > 1"
             id="tran-table"
             :items="transactions"
             :fields="fields"
@@ -49,38 +68,17 @@
             :per-page="perPage"
             :current-page="currentPage"
             :filter="filter"
-            filter-included-fields="product_descr"
+            :filter-included-fields="searchFields"
             responsive="sm"
         >
-          <template #cell(product_id)="data">
-            <b-form-input v-if="transactions[data.index].isEdit" type="number"
-                          v-model="transactions[data.index].product_id"></b-form-input>
-            <span v-else>{{ data.value }}</span>
-          </template>
-          <template #cell(transaction_type)="data">
-            <b-form-input readonly v-if="transactions[data.index].isEdit" type="text" value="Purchase"></b-form-input>
-            <span v-else>{{ data.value }}</span>
-          </template>
-          <template #cell(qty)="data">
-            <b-form-input v-if="transactions[data.index].isEdit" type="number"
-                          v-model="transactions[data.index].qty"></b-form-input>
-            <span v-else>{{ data.value }}</span>
-          </template>
-          <template #cell(price)="data">
-            <b-form-input v-if="transactions[data.index].isEdit" type="number"
-                          v-model="transactions[data.index].price"></b-form-input>
-            <span v-else>{{ data.value }}</span>
-          </template>
-          <template #cell(edit)="data">
-            <v-btn color="#78be20" v-if="transactions[data.index].isEdit" @click="recordPurchase(data)">Save</v-btn>
-          </template>
         </b-table>
       </b-overlay>
     </div>
   </v-container>
 </template>
 
-<script>
+<script lang="ts">
+import { mapActions, mapGetters } from "vuex";
 import PageBanner from "./Shared/PageBanner.vue";
 import Alert from './Shared/Alert.vue'
 
@@ -91,13 +89,18 @@ export default {
     return {
       sortBy: 'transaction_date',
       filter: null,
-      sortDesc: false,
+      sortDesc: true,
       perPage: 15,
       currentPage: 1,
       editMode: false,
       dismissSecs: 10,
       dismissCountDown: 0,
       isLoading: false,
+      prodInput: false,
+      selectedProduct: null,
+      purchasePrice: 0,
+      purchaseQty: 0,
+      searchFields: ["product_descr"],
       fields: [
         {key: 'product_id', sortable: true},
         {key: 'transaction_date', sortable: true},
@@ -107,13 +110,23 @@ export default {
         {key: 'price', sortable: false},
         {key: 'edit', label: ''}
       ],
-      transactions: []
     }
   },
   mounted() {
-    this.getTransactions()
+    if (!this.transactions.isLoaded) {
+      this.loadTransactions();
+    }
+    if (!this.products.isLoaded) {
+      this.loadProducts();
+    }
   },
   computed: {
+    ...mapGetters("transactions", {
+      transactions: "getTransactions",
+    }),
+    ...mapGetters("products", {
+      products: "getProducts",
+    }),
     rows() {
       return this.transactions.length;
     },
@@ -128,61 +141,42 @@ export default {
     }
   },
   methods: {
+    ...mapActions("transactions", ["loadTransactions", "createPurchase"]),
+    ...mapActions("products", ["loadProducts"]),
     actionClick(value) {
       if (value === 'Enter Purchase') {
-        this.addRowHandler();
+        this.editMode = true;
+        this.prodInput = true;
       }
       if (value === 'Cancel') {
         this.cancelAdd();
       }
     },
-    async getTransactions() {
-      this.isLoading = true;
-      await this.axios.get('/api/transactions').then(response => {
-        this.transactions = response.data
-        this.isLoading = false;
-      }).catch(error => {
-        console.log(error)
-        this.transactions = [];
-        this.isLoading = false;
-      })
-    },
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown
     },
-    recordPurchase(data) {
-      this.transactions[data.index].isEdit = !this.transactions[data.index].isEdit;
-      this.createPurchase(this.transactions[data.index].product_id, this.transactions[data.index].qty, this.transactions[data.index].price);
-    },
-    inputHandler(value, index, key) {
-      this.transactions[index][key] = value;
-      this.$set(this.transactions, index, this.transactions[index]);
-      this.$emit("input", this.transactions);
-    },
-    addRowHandler() {
-      this.sortBy = 'transaction_date';
-      this.sortDesc = false;
-      this.editMode = true;
-      const newRow = this.fields.reduce((a, c) => ({...a, [c.key]: null}), {})
-      newRow.isEdit = true;
-      this.transactions.unshift(newRow);
-      this.$emit('input', this.transactions);
+    recordPurchase() {
+      this.createPurchase({
+        "productID": this.selectedProduct.productID,
+        "quantity": this.purchaseQty,
+        "price": this.purchasePrice,
+        "description": this.selectedProduct.description
+      });
+      this.prodInput = false;
+      this.editMode = false;
+      this.clearInputs();
+      this.dismissCountDown = 10;
     },
     cancelAdd() {
-      this.transactions.splice(0, 1);
+      this.prodInput = false;
       this.editMode = false;
+      this.clearInputs();
     },
-    createPurchase(productId, qty, price) {
-      this.axios.put(`/api/purchases/create/${productId}/${qty}/${price}`).then(response => {
-        this.getTransactions();
-        this.sortBy = 'transaction_date';
-        this.sortDesc = true;
-        this.editMode = false;
-        this.dismissCountDown = 10;
-      }).catch(error => {
-        console.log(error);
-      })
-    },
+    clearInputs() {
+      this.selectedProduct = null;
+      this.purchaseQty = 0;
+      this.purchasePrice = 0;
+    }
   }
 }
 </script>
