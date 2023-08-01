@@ -1,16 +1,16 @@
+import Vuetify from "vuetify";
+
 require('./bootstrap');
-
-
-window.Vue = require('vue').default;
 
 import App from './components/App.vue';
 import VueRouter from 'vue-router';
 import VueAxios from 'vue-axios';
 import axios from 'axios';
+import store from "./store/index.ts"
 import {routes} from './routes';
+import vuetify from './vuetify';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 
-// Import Bootstrap and BootstrapVue CSS files (order is important)
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
@@ -24,8 +24,14 @@ const router = new VueRouter({
     routes: routes
 });
 
+Vue.use(Vuetify);
+import 'vuetify/dist/vuetify.min.css'
+import Vue from "vue";
+
 const app = new Vue({
     el: '#app',
+    vuetify,
     router: router,
+    store,
     render: h => h(App),
 });

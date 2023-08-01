@@ -15,9 +15,9 @@ class Product extends Model
     * This model is for the products table.
     */
 
-    protected string $table = 'products';
+    protected $table = 'products';
 
-    public array $fillable = [
+    public $fillable = [
         'external_id', // Field to store external system reference if applicable
         'description',
         'created_at',

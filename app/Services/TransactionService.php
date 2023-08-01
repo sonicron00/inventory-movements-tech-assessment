@@ -5,6 +5,7 @@ namespace App\Services;
 
 use App\Repositories\ApplicationRepository;
 use App\Repositories\PurchaseRepository;
+use Carbon\Carbon;
 
 
 class TransactionService
@@ -15,26 +16,10 @@ class TransactionService
      * @since      Class available since Release 0.0.1
      */
 
-
-    public ApplicationRepository $appRepo;
-    public PurchaseRepository $purchaseRepo;
-    public ProductService $productService;
-
-    /**
-     * Transaction Service constructor.
-     *
-     * @param ApplicationRepository $appRepo
-     * @param PurchaseRepository $purchaseRepo
-     * @param \App\Services\ProductService $productService
-     */
     public function __construct(
-        ApplicationRepository $appRepo,
-        PurchaseRepository $purchaseRepo,
-        ProductService $productService
+        public ApplicationRepository $appRepo,
+        public PurchaseRepository $purchaseRepo,
     ) {
-        $this->appRepo = $appRepo;
-        $this->purchaseRepo = $purchaseRepo;
-        $this->productService = $productService;
     }
 
     /**
@@ -49,6 +34,7 @@ class TransactionService
         $transactionCreatePayload['type'] = 'Application';
         $transactionCreatePayload['product_id'] = $productId;
         $transactionCreatePayload['quantity'] = $quantity * -1;
+        $transactionCreatePayload['transaction_date'] = Carbon::now()->format('y-m-d');
 
         $this->createTransaction($transactionCreatePayload);
     }
@@ -60,6 +46,7 @@ class TransactionService
         $transactionCreatePayload['product_id'] = $productId;
         $transactionCreatePayload['qty_purchased'] = $quantity;
         $transactionCreatePayload['price'] = $price;
+        $transactionCreatePayload['transaction_date'] = Carbon::now()->format('y-m-d');
 
         $this->createTransaction($transactionCreatePayload);
     }
@@ -98,30 +85,24 @@ class TransactionService
     {
         $allTransactionsFormatted = [];
         foreach ($this->getAllApplications() as $application) {
-            array_push(
-                $allTransactionsFormatted,
-                (object)[
-                    'product_id' => $application['product_id'],
-                    'transaction_date' => $application['transaction_date'],
-                    'transaction_type' => 'Application',
-                    'product_descr' => $this->productService->getProductDescriptionFromId($application['product_id']),
-                    'qty' => $application['quantity'],
-                    'price' => ''
-                ]
-            );
+            $allTransactionsFormatted[] = (object)[
+                'product_id' => $application['product_id'],
+                'transaction_date' => $application['transaction_date'],
+                'transaction_type' => 'Application',
+                'product_descr' => $application['products']['description'] ?? 'deleted',
+                'qty' => $application['quantity'],
+                'price' => ''
+            ];
         }
         foreach ($this->getAllPurchases() as $purchase) {
-            array_push(
-                $allTransactionsFormatted,
-                (object)[
-                    'product_id' => $purchase['product_id'],
-                    'transaction_date' => $purchase['transaction_date'],
-                    'transaction_type' => 'Purchase',
-                    'product_descr' => $this->productService->getProductDescriptionFromId($application['product_id']),
-                    'qty' => $purchase['qty_purchased'],
-                    'price' => $purchase['price']
-                ]
-            );
+            $allTransactionsFormatted[] = (object)[
+                'product_id' => $purchase['product_id'],
+                'transaction_date' => $purchase['transaction_date'],
+                'transaction_type' => 'Purchase',
+                'product_descr' => $purchase['products']['description'] ?? 'deleted',
+                'qty' => $purchase['qty_purchased'],
+                'price' => $purchase['price']
+            ];
         }
         return $allTransactionsFormatted;
     }
@@ -132,7 +113,7 @@ class TransactionService
      */
     public function getAllApplications(): array
     {
-        return $this->appRepo->all()->toArray();
+        return $this->appRepo->allWithRelation('products');
     }
 
     /**
@@ -141,7 +122,7 @@ class TransactionService
      */
     public function getAllPurchases(): array
     {
-        return $this->purchaseRepo->all()->toArray();
+        return $this->purchaseRepo->allWithRelation('products');
     }
 
 }

@@ -81,9 +81,17 @@ abstract class BaseRepository
      *
      * @return mixed
      */
-    public function all()
+    public function all(): mixed
     {
         return $this->model->all();
+    }
+
+    public function allWithRelation(array|string $relations): array
+    {
+        if (gettype($relations) == 'array') {
+            $relations = "'" . implode("','", $relations) . "'";
+        }
+        return $this->model->with($relations)->orderBy('updated_at','desc')->get()->all();
     }
 
     /**

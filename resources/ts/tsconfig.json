@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "importHelpers": true,
+        "allowSyntheticDefaultImports": true,
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "types": [
+            "vuetify"
+        ],
+        "paths": {
+            "@/*": ["ts/*"]
+        },
+        "baseUrl": "ts",
+        "lib": [ "es2015", "dom" ]
+    }
+}
