@@ -52,9 +52,20 @@ class ProductService
         return $productDetail;
     }
 
-    public function createOrUpdateProduct(int $productId, string $description): mixed
+    public function createOrUpdateProduct(int $productId, string $description, int $qty): mixed
     {
-        return $this->productRepo->updateOrCreate(['id' => $productId], ['description' => $description]);
+        $newProduct = $this->productRepo->updateOrCreate(['id' => $productId], ['description' => $description]);
+        if ($qty > 0) {
+            // Record opening purchase quantity
+            $transactionCreatePayload = [];
+            $transactionCreatePayload['type'] = 'Purchase';
+            $transactionCreatePayload['product_id'] = $newProduct->id;
+            $transactionCreatePayload['qty_purchased'] = $qty;
+            $transactionCreatePayload['price'] = 0;
+            $transactionCreatePayload['transaction_date'] = Carbon::now()->format('y-m-d');
+            $this->transactionService->createTransaction($transactionCreatePayload);
+        }
+        return $newProduct;
     }
 
     /**

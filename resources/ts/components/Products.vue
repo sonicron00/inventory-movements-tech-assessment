@@ -2,13 +2,13 @@
   <v-container>
     <PageBanner v-if="canEdit" title="Inventory" subtitle="Inventory product management" :actions="actionButtons"
                 @clickAction="actionClick"></PageBanner>
-    <v-card v-if="editMode">
+    <v-card v-if="editMode" class="mx-auto" max-width="344" variant="outlined">
       <v-card-text>
         <v-text-field label="Product description" v-model="newProductDescription"></v-text-field>
         <v-text-field label="Opening quantity" type="number" v-model="newProductQty"></v-text-field>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" block @click="saveProduct()">Save Product</v-btn>
+        <v-btn color="#78be20" :disabled="this.newProductDescription.length < 4 || this.newProductQty <= 0" block @click="saveProduct()">Save Product</v-btn>
       </v-card-actions>
     </v-card>
     <b-alert
@@ -24,8 +24,11 @@
     <v-data-table v-if="products.length > 1"
       :headers="headers"
       :items="products"
-      :loading="isLoading"
+      :loading="this.isLoading"
       class="elevation-0">
+      <template v-slot:[`item.quantity`]="{ item }">
+        {{ item.quantity.toLocaleString("en-US") }}
+      </template>
       <template v-if="this.canEdit" v-slot:[`item.description`]="{ item }">
         <v-text-field v-if="item.isEdit" type="text" v-model="newProductDescription"></v-text-field>
         <span v-else>{{ item.description }}</span>
@@ -43,7 +46,7 @@
           <v-card-text>
             <div>
               <div class="text-overline mb-1">Application Value</div>
-              <div class="text-h6 mb-1">NZD$ {{  item.calculatedPrice }}</div>
+              <div class="text-h6 mb-1">NZD$ {{  item.calculatedPrice.toLocaleString("en-US") }}</div>
             </div>
           </v-card-text>
           <v-card-actions>
@@ -71,7 +74,6 @@ export default {
       requestedQuantity: 0,
       invalidQty: false,
       insufficientQty: false,
-      isLoading: false,
       editMode: false,
       showBanner: true,
       headers: [
@@ -86,6 +88,7 @@ export default {
   computed: {
     ...mapGetters("products", {
       products: "getProducts",
+      isLoading: "isLoading"
     }),
     actionButtons() {
       if (!this.editMode) {
@@ -95,13 +98,11 @@ export default {
     }
   },
   mounted() {
-    if (!this.products.isLoaded) {
       this.loadProducts();
-    }
   },
   methods: {
     ...mapActions("products", ["loadProducts", "createOrUpdateProduct", "calcPriceForQuantity", "commitApplication"]),
-    ...mapMutations("products", ["editProduct"]),
+    ...mapMutations("products", ["editProduct", "clearEdit"]),
     actionClick(value) {
       if (value === 'Add New Product') {
         this.addRowHandler();

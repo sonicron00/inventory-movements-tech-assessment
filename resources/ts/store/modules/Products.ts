@@ -22,12 +22,18 @@ const ProductsModule = {
         getProducts(state: IProductState): IProduct[] {
             return state.products.products;
         },
+        isLoading(state: IProductState): boolean {
+            return !state.products.isLoaded;
+        }
     },
     mutations: {
         setProducts(state: IProductState, products: any) {
             state.products.products = products.data;
         },
-        updateProducts(state: IProductState, productData: { "data": { "id": number, "description": string } }) {
+        switchLoading(state: IProductState) {
+            state.products.isLoaded = !state.products.isLoaded;
+        },
+        updateProducts(state: IProductState, productData: { "data": { "id": number, "description": string, "qty": number}}) {
             const prodIndex = state.products.products.find(function(item) {
                 return item.productID === productData.data.id;
             });
@@ -36,7 +42,7 @@ const ProductsModule = {
                 state.products.products.push(
                     {"productID": productData.data.id,
                         "description": productData.data.description,
-                        "quantity": 0,
+                        "quantity": productData.data.qty,
                         "isEdit": false,
                         "calculatedPrice": 0,
                         "showPrice": false
@@ -81,33 +87,39 @@ const ProductsModule = {
     },
     actions: {
         async loadProducts(context: Context, payload?: IPayload) {
+
             if (!payload?.force && context.state.products.isLoaded) {
                 // Product list is already loaded
                 return new Promise((resolve, reject) => {
                     resolve(context.state.products);
                 });
             }
+
             return axios.get('/api/products').then((response) => {
                 context.commit("setProducts", response);
-                return response;
+                context.commit("switchLoading");
             });
         },
         async createOrUpdateProduct(context: Context, payload: any) {
-            return axios.put(`/api/products/edit/${payload.description}/${payload.productID ?? 0}`).then((response) => {
+            context.commit("switchLoading");
+            return axios.put(`/api/products/edit/${payload.description}/${payload.productID ?? 0}/${payload.qty ?? 0}`).then((response) => {
+                response.data.qty = payload.qty;
                 context.commit("updateProducts", response);
-                return response;
+                context.commit("switchLoading");
             });
         },
         async calcPriceForQuantity(context: Context, payload: any) {
+            context.commit("switchLoading");
             return axios.get(`/api/products/preapply/${payload.productID}/${payload.requestedQuantity}`).then(response => {
                 context.commit("updateProductCalc", { "data": { "id": payload.productID, "price": response.data } });
-                return response;
+                context.commit("switchLoading");
             });
         },
         async commitApplication(context: Context, payload: any) {
+            context.commit("switchLoading");
             return axios.put(`/api/products/apply/${payload.productID}/${payload.quantity}`).then(response => {
                 context.commit("updateProductQty", { "data": { "id": payload.productID, "appliedQty": payload.quantity } });
-                return response;
+                context.commit("switchLoading");
             });
         }
     },

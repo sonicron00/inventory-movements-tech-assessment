@@ -26,9 +26,9 @@ class ProductController extends Controller
         return $this->productService->computeFifoValueByQuantityAndProduct($productId, $quantity);
     }
 
-    public function createOrUpdate(string $description, int $productId = 0): mixed
+    public function createOrUpdate(string $description, int $productId = 0, int $initQty = 0): mixed
     {
-        return $this->productService->createOrUpdateProduct($productId, $description);
+        return $this->productService->createOrUpdateProduct($productId, $description, $initQty);
     }
 
     public function getProductValueByMonth(int $months, int|string $productId): array

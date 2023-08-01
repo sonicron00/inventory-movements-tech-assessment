@@ -8,7 +8,7 @@
           </div>
           <b-container class="bv-example-row">
             <b-row>
-              <b-col><img src="../assets/lomond.png" style="width:100%"></b-col>
+              <b-col cols="3"><img src="../assets/lomond.png" style="width:100%"></b-col>
               <b-col>
                 <p>
                   Hello, welcome, and thank you for reaching this section.
@@ -23,7 +23,7 @@
           <b-container class="bv-example-row">
             <b-row>
               <b-col>
-                <p>All development has remained in the original repository, open source for review - just hit the GitHub logo: <a href="https://github.com/sonicron00/inventory-movements-tech-assessment"><img src="../assets/github-mark.svg" style="width:5%;"></a></p>
+                <p>All development has remained in the original repository, open source for review - just hit the GitHub logo: <a href="https://github.com/sonicron00/inventory-movements-tech-assessment" target=”_blank”><img src="../assets/github-mark.svg" style="width:3%;"></a></p>
               </b-col>
             </b-row>
           </b-container>

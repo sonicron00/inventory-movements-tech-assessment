@@ -51,7 +51,6 @@ const TransactionsModule = {
             }
             return axios.get('/api/transactions').then(response => {
                 context.commit("setTransactions", response);
-                return response;
             });
         },
         async createPurchase(context: Context, payload) {
@@ -63,7 +62,7 @@ const TransactionsModule = {
             }
             return axios.put(`/api/purchases/create/${payload.productID}/${Number(payload.quantity)}/${Number(payload.price)}`).then(response => {
                 context.commit("addTransaction", payload);
-                return response;
+
             });
         },
     },

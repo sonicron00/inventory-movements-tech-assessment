@@ -61,7 +61,6 @@
 
           <v-sheet color="transparent">
             <v-sparkline
-                :key="String(avg)"
                 :smooth="16"
                 :gradient="['#f72047', '#ffd200', '#1feaea']"
                 :line-width="3"
@@ -81,31 +80,30 @@
   </v-container>
 </template>
 
-<script>
+<script lang="ts">
 
-
+import { mapActions, mapGetters } from "vuex";
 export default {
   name: "Home",
   data: () => ({
     selectedMonths: 12,
     selectedProduct: null,
-    products: [],
     datedValues: [],
     months: [],
   }),
   mounted() {
     this.getProductData();
-    this.getProducts();
-  },
-  computed: {
-    avg() {
-      const sum = this.datedValues.reduce((acc, cur) => acc + cur, 0)
-      const length = this.datedValues.length
-      if (!sum && !length) return 0
-      return Math.ceil(sum / length)
+    if (!this.products.isLoaded) {
+      this.loadProducts();
     }
   },
+  computed: {
+    ...mapGetters("products", {
+      products: "getProducts",
+    }),
+  },
   methods: {
+    ...mapActions("products", ["loadProducts"]),
     refreshGraph() {
       this.getProductData();
     },
@@ -123,14 +121,6 @@ export default {
         console.log(error)
       })
     },
-    async getProducts() {
-      await this.axios.get('/api/products').then(response => {
-        this.products = response.data;
-        this.products.unshift({'productID': null, 'description': 'Select all'});
-      }).catch(error => {
-        console.log(error)
-      })
-    }
   }
 }
 </script>

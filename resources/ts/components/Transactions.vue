@@ -71,6 +71,12 @@
             :filter-included-fields="searchFields"
             responsive="sm"
         >
+          <template #cell(qty)="data">
+            {{ data.value.toLocaleString("en-US") }}
+          </template>
+          <template #cell(price)="data">
+            {{ data.value.toLocaleString("en-US") }}
+          </template>
         </b-table>
       </b-overlay>
     </div>

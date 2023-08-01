@@ -1,7 +1,9 @@
 <template>
   <div>
     <v-app-bar color="deep-purple accent-4" app clipped-left dense dark>
-      <v-toolbar-title>Figured x Ryan - 2023 GLOW-UP</v-toolbar-title>
+      <v-toolbar-title>Figured x Ryan - 2023 GLOW-UP + PROPOSAL</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <a href="https://github.com/sonicron00/inventory-movements-tech-assessment" target=”_blank” style="color:white;">View this app on GitHub</a>
     </v-app-bar>
     <v-navigation-drawer
         app
@@ -35,7 +37,7 @@ export default {
         },
         {
           href: '/',
-          title: 'Home'
+          title: 'Home',
         },
         {
           title: 'Original Assessment',
