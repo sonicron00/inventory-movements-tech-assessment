@@ -179,7 +179,7 @@ class ProductService
                 }
             }
             $monthPosition = $rollingBalance + $monthNetMovement;
-            $monthsArray[] = Carbon::now()->subMonths($monthTicker)->shortMonthName .'-'. Carbon::now()->subMonths($monthTicker)->year;
+            $monthsArray[] = Carbon::now()->subMonths($monthTicker)->shortMonthName .'-'. Carbon::now()->subMonths($monthTicker)->format('y');
             $dataArray[] = $monthPosition;
             $rollingBalance += $monthNetMovement;
             $monthTicker--;
